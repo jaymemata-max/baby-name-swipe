@@ -1,0 +1,74 @@
+# Decisions
+
+Short notes on choices that are not obvious from the code, and the ones worth
+revisiting.
+
+## Authorisation lives in Postgres, not in route handlers
+
+Every table has row level security scoped to `current_couple_id()`. The API
+never uses the service role key, so a forgotten `where couple_id = ...` in a
+handler leaks nothing.
+
+This was checked, not assumed: `supabase/tests/02_security_and_undo.sql` has a
+third user try to read the other couple's swipes, matches, couples and
+profiles, and try to write a swipe under someone else's id. All blocked.
+
+## Matches are a trigger, not application code
+
+`sync_match()` runs after every swipe insert, update and delete. Doing it in
+the API would mean read-then-write, which races if both partners swipe the
+same name at the same moment - plausible when two people sit on the sofa
+swiping together.
+
+The trigger also means matches stay correct when a swipe is undone, which an
+API-side implementation would have had to remember separately.
+
+## `matches` is a real table, not a view
+
+A view over `swipes` would always be correct and would need no trigger. A
+table was chosen because matches carry their own state: `shortlisted`, `note`,
+and eventually a ranking. It is also what Supabase Realtime can publish, which
+is how the "it's a match" popup will work without polling.
+
+## Three swipe directions, not two
+
+`pass`, `like`, `love`. `love` costs nothing to store and gives a shortlist
+signal for free: `is_love` is true only when *both* of you used it. Those are
+the names to start arguing about.
+
+## Joining late does not lose your swipes
+
+Both people will open the app before either sends an invite code. So
+`join_couple()` moves your existing swipes and custom names into your
+partner's couple and recalculates matches, rather than starting you over.
+
+Known limit: if you both added the same custom name separately, the loser of
+the collision is dropped along with the swipes on it. Rare, and the name is
+still typeable.
+
+## The deck ordering is deliberate
+
+`partner_liked desc, is_custom desc, popularity nulls last, random()`
+
+1. Names your partner already liked, so a match lands in the first few cards
+   instead of forty minutes in.
+2. Names you added yourselves. They have no popularity rank, so without this
+   they sank below 200 catalogue names and effectively never appeared. This
+   was a real bug caught by a test, not a hypothetical.
+3. The catalogue by popularity, randomised within ties.
+
+## Custom names still have to be swiped by whoever added them
+
+Auto-liking your own addition would make matches meaningless - you would match
+on everything you typed in. Adding a name puts it in the deck. You still say
+yes to it.
+
+## Open questions
+
+- **Should `partner_liked` be shown in the UI?** The API returns it. Showing it
+  outright turns the game into rubber-stamping. Probably keep it subtle or
+  drop it from the card.
+- **Ranking matched names.** A shortlist of 40 matches is not a decision. Some
+  head-to-head or drag-to-order step is likely needed.
+- **Surname fit.** "Sounds good with our surname" is the real test and nothing
+  models it.
