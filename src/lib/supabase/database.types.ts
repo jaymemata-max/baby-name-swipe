@@ -4,6 +4,7 @@
  */
 
 export type NameGender = "boy" | "girl" | "unisex";
+export type NameLanguage = "en" | "es" | "nl" | "fr";
 export type SwipeDirection = "pass" | "like" | "love";
 
 export type Couple = {
@@ -30,6 +31,8 @@ export type BabyName = {
   origin: string | null;
   meaning: string | null;
   popularity: number | null;
+  /** Languages a native speaker can pronounce this name naturally in. */
+  works_in: NameLanguage[];
   created_at: string;
 };
 
@@ -60,6 +63,7 @@ export type DeckCard = {
   origin: string | null;
   meaning: string | null;
   popularity: number | null;
+  works_in: NameLanguage[];
   is_custom: boolean;
   partner_liked: boolean;
 };
@@ -99,7 +103,10 @@ export type Database = {
       join_couple: { Args: { p_invite_code: string }; Returns: Couple };
       leave_couple: { Args: Record<string, never>; Returns: undefined };
       reject_match: { Args: { p_name_id: string }; Returns: undefined };
-      get_deck: { Args: { p_gender?: string; p_limit?: number }; Returns: DeckCard[] };
+      get_deck: {
+        Args: { p_gender?: string; p_limit?: number; p_languages?: string[] | null };
+        Returns: DeckCard[];
+      };
       couple_stats: { Args: Record<string, never>; Returns: CoupleStats[] };
     };
     Enums: {

@@ -63,6 +63,27 @@ Auto-liking your own addition would make matches meaningless - you would match
 on everything you typed in. Adding a name puts it in the deck. You still say
 yes to it.
 
+## `works_in` means sayable, not identical
+
+Every catalogue name carries a `works_in text[]` of language codes. The test
+is: **can a native speaker of that language say it without effort, and does it
+sound like a real name to them?** Not: does it sound the same everywhere.
+
+So `Julia` is tagged `{en,es,nl,fr}` even though the J differs in each - it is
+a normal name in all four. `Gijs` is `{nl}`, because the G and the IJ do not
+exist outside Dutch. `Ella` is `{en,nl,fr}` and not Spanish, because in
+Spanish it is the word for "she".
+
+The tags are judgement, not data. Correcting one is a single `UPDATE`:
+
+```sql
+update public.names set works_in = '{en,es,nl}'
+where couple_id is null and lower(value) = 'floris';
+```
+
+Custom names get no tags and always bypass the filter. If you typed it in
+yourself, you can presumably say it.
+
 ## Open questions
 
 - **Should `partner_liked` be shown in the UI?** The API returns it. Showing it
@@ -72,3 +93,6 @@ yes to it.
   head-to-head or drag-to-order step is likely needed.
 - **Surname fit.** "Sounds good with our surname" is the real test and nothing
   models it.
+- **Is 173 names enough?** That is what `en,es,nl` leaves. Plenty to find a
+  shortlist, but if the deck runs dry the answer is more catalogue, not a
+  looser filter.

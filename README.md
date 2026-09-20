@@ -12,7 +12,7 @@ answers until then - so nobody is nudged into agreeing.
 
 - [x] Schema, row level security, match logic
 - [x] REST API for onboarding, deck, swipes, matches, custom names
-- [x] 205-name starter catalogue (Dutch, international, Spanish/Caribbean)
+- [x] 290-name catalogue, tagged by which languages it is pronounceable in
 - [x] Schema tests covering matching, security and the couple rules
 - [ ] Swipe UI
 - [ ] Realtime "it's a match" popup
@@ -40,6 +40,11 @@ session and Postgres decides what you may see.
 
 Matching is a database trigger, not application code. If you both swipe the
 same name in the same second, you still get exactly one match.
+
+Every catalogue name is tagged with the languages a native speaker can say it
+in (`en`, `es`, `nl`, `fr`). `Gijs` is Dutch-only; `Mateo` works in all four.
+The deck can filter on that, so a mixed-language family never has to argue
+about a name half of them cannot pronounce.
 
 ```
 couples ──┬── profiles (2)

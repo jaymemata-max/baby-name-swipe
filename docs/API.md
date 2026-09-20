@@ -85,10 +85,18 @@ Leave. Your swipes and your shared matches stay for the other person.
 
 ## Swiping
 
-### `GET /api/deck?gender=boy&limit=25`
+### `GET /api/deck?gender=boy&limit=25&languages=en,es,nl`
 
 `gender` is `all` (default), `boy`, `girl` or `unisex`. `boy` and `girl` both
 include unisex names. `limit` is 1-100, default 25.
+
+`languages` is a comma-separated subset of `en`, `es`, `nl`, `fr`. A name is
+only dealt if a native speaker of **every** listed language can pronounce it
+naturally. Leave it off for the whole catalogue. Names you added yourselves
+always come through, filter or not - you chose them on purpose.
+
+With `languages=en,es,nl` the catalogue is 173 names (88 boys, 93 girls,
+including unisex in both). Without a filter it is 290.
 
 ```json
 {
@@ -100,6 +108,7 @@ include unisex names. `limit` is 1-100, default 25.
       "origin": "Hebrew",
       "meaning": "Rest, comfort",
       "popularity": 1,
+      "works_in": ["en", "es", "nl", "fr"],
       "is_custom": false,
       "partner_liked": true
     }
