@@ -89,7 +89,7 @@ later, only reset it.
 
 ### 2. Apply the schema
 
-Five migrations, in filename order. Two ways:
+Apply every migration in filename order. Two ways:
 
 **CLI** (repeatable, use this if you plan more schema changes):
 
