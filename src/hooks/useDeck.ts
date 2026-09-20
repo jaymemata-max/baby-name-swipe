@@ -37,6 +37,7 @@ export function useDeck(onMatchCelebration?: (data: SwipeResponse) => void) {
   // Keep track of recent swipes for visual undo
   const swipeHistory = useRef<{ card: DeckCard; direction: SwipeDirection }[]>([]);
   const isFetchingRef = useRef(false);
+  const prefetchExhaustedRef = useRef(false);
 
   // Save filters to localStorage whenever they change
   useEffect(() => {
@@ -51,7 +52,10 @@ export function useDeck(onMatchCelebration?: (data: SwipeResponse) => void) {
     if (isFetchingRef.current) return;
     isFetchingRef.current = true;
 
-    if (!append) setLoading(true);
+    if (!append) {
+      prefetchExhaustedRef.current = false;
+      setLoading(true);
+    }
     else setIsPrefetching(true);
 
     setError(null);
@@ -78,9 +82,11 @@ export function useDeck(onMatchCelebration?: (data: SwipeResponse) => void) {
         // Append unique cards that aren't already in stack
         const existingIds = new Set(prev.map((c) => c.id));
         const filteredNew = newCards.filter((c) => !existingIds.has(c.id));
+        prefetchExhaustedRef.current = filteredNew.length === 0;
         return [...prev, ...filteredNew];
       });
     } catch (err: unknown) {
+      if (append) prefetchExhaustedRef.current = true;
       setError(err instanceof Error ? err.message : 'Failed to load deck');
     } finally {
       setLoading(false);
@@ -96,7 +102,13 @@ export function useDeck(onMatchCelebration?: (data: SwipeResponse) => void) {
 
   // Prefetch when <= 8 cards remain in deck
   useEffect(() => {
-    if (!loading && !isPrefetching && cards.length > 0 && cards.length <= 8) {
+    if (
+      !loading &&
+      !isPrefetching &&
+      !prefetchExhaustedRef.current &&
+      cards.length > 0 &&
+      cards.length <= 8
+    ) {
       fetchDeck(true);
     }
   }, [cards.length, loading, isPrefetching, fetchDeck]);
