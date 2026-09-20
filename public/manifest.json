@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "Baby Names",
+  "short_name": "BabyNames",
+  "description": "Tinder for baby names for couples expecting a child.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#fff7f4",
+  "theme_color": "#fff7f4",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

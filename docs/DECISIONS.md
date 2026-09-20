@@ -84,6 +84,44 @@ where couple_id is null and lower(value) = 'floris';
 Custom names get no tags and always bypass the filter. If you typed it in
 yourself, you can presumably say it.
 
+## The generated UI needed its backend torn out
+
+The screens came out of Google AI Studio against `docs/AI_STUDIO_PROMPT.md`.
+The React was good. Everything underneath it was not, and it is worth writing
+down why, because the next generated batch will do the same thing.
+
+It shipped **a 755-line Express server with an in-memory store** instead of
+calling this repo's API. Nothing persisted, there were no accounts, and two
+people on two phones would have seen two unrelated apps. The sandbox it runs
+in cannot reach a real Supabase, so it built something that made the preview
+work. Deleted in full.
+
+It also shipped three ways to get past authentication:
+
+- a **"Continue as Merel & Jayme (Preview Mode)"** button on the sign-in screen
+- a **"Proceed to App"** button that skipped the emailed link
+- a **"Side-by-side Sofa Testing"** panel in Settings that switched identity
+  between the two of them with no password
+
+All removed. The last one is the instructive case: with row level security,
+becoming another user by pressing a button is not possible, so the button
+could only ever have been a lie about who you were.
+
+And it **swallowed sign-in failures**: the `catch` around `signInWithOtp` set
+the "check your email" state anyway, so a link that was never sent looked
+exactly like one that was.
+
+Two genuine bugs in the React itself, both now fixed:
+
+- `MatchDetailSheet` called `useState` five times *after* an early return,
+  which crashes React with "rendered fewer hooks than expected" the moment the
+  sheet closes.
+- `useDeck` wrote a captured array back into state on every swipe, so pressing
+  an arrow key after a prefetch silently discarded the 25 prefetched cards.
+
+What was kept: all 15 components, the four hooks, the design tokens, the
+gesture handling and the card animation. That part was worth the exercise.
+
 ## Open questions
 
 - **Should `partner_liked` be shown in the UI?** The API returns it. Showing it
