@@ -34,11 +34,15 @@ export const OnboardingScreen: React.FC<OnboardingScreenProps> = ({
       } else {
         // Fetch couple to show invite code
         const meRes = await fetch('/api/me');
-        if (meRes.ok) {
-          const json = await meRes.json();
-          if (json.couple) {
-            setCreatedCouple(json.couple);
-          }
+        if (!meRes.ok) {
+          setErrorMsg('Could not load your invite code. Please try again.');
+          return;
+        }
+        const json = await meRes.json();
+        if (json.couple) {
+          setCreatedCouple(json.couple);
+        } else {
+          setErrorMsg('Could not load your invite code. Please try again.');
         }
       }
     } catch {
