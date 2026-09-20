@@ -74,43 +74,123 @@ The routes earn their place for three things:
 If you want it leaner later, the realtime subscription for match popups should
 go straight to Supabase from the browser. That is what realtime is for.
 
-## Deploying
+## Going live, in order
 
-### Supabase (once)
+Roughly 30 minutes. Steps 1-3 are Supabase, 4-5 are Vercel, 6-7 are the two
+things people forget.
 
-1. Create a project at supabase.com. Pick the region closest to you
-   (`eu-central-1` for the Netherlands, `us-east-1` for Aruba).
-2. Save the database password somewhere real.
-3. Apply the schema:
-   ```bash
-   npx supabase link --project-ref YOUR-REF
-   npx supabase db push
-   ```
-4. Auth -> Providers: leave **Email** on, turn **Confirm email** on.
-5. Auth -> URL Configuration: add your Vercel URL and
-   `https://your-app.vercel.app/auth/callback` to the redirect allow list.
-6. **Turn off public sign-ups once you have both signed in.** Auth -> Sign In /
-   Up -> disable new user signups. This app is for two people; leaving
-   registration open on a public URL is the only real security exposure here.
+### 1. Create the Supabase project
 
-### Vercel
+At supabase.com. Pick the region closest to where you actually are:
+`eu-central-1` (Frankfurt) for the Netherlands, `us-east-1` for Aruba.
 
-1. Import the GitHub repository.
-2. Environment variables (all environments):
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `NEXT_PUBLIC_SITE_URL` (your production URL)
-3. Deploy. No build configuration needed.
+Save the database password in a password manager. You cannot read it back
+later, only reset it.
 
-The anon key is safe in the browser. It is designed to be public, and row
-level security is what stops it being useful to anyone else. **The service
-role key must never appear in a `NEXT_PUBLIC_` variable** - it bypasses RLS
-entirely.
+### 2. Apply the schema
 
-### GitHub Actions keep-alive
+Five migrations, in filename order. Two ways:
 
-Add a repository secret `HEALTHCHECK_URL` set to
-`https://your-app.vercel.app/api/health`. The workflow does the rest.
+**CLI** (repeatable, use this if you plan more schema changes):
+
+```bash
+npx supabase init          # writes supabase/config.toml, first time only
+npx supabase link --project-ref YOUR-REF
+npx supabase db push
+```
+
+No Docker needed: `db push` talks to the hosted project directly.
+
+**SQL Editor** (fewer moving parts, fine for a one-off): open each file in
+`supabase/migrations/` in filename order and run it. Order matters, the later
+ones depend on the earlier ones.
+
+Check it worked:
+
+```sql
+select count(*) from names;                      -- 290
+select count(*) from names where works_in @> '{en,es,nl}';  -- 173
+```
+
+### 3. Configure auth
+
+Authentication → Providers: leave **Email** on. Turn **Confirm email** on.
+
+Authentication → URL Configuration:
+- Site URL: `https://your-app.vercel.app`
+- Redirect URLs: add `https://your-app.vercel.app/auth/callback`
+  and `http://localhost:3000/auth/callback` for local work
+
+The callback URL has to match exactly or the magic link lands on an error.
+
+### 4. Deploy to Vercel
+
+Import the GitHub repository. Framework detection picks up Next.js on its own.
+
+Environment variables, all three environments (Production, Preview,
+Development), from Supabase → Project Settings → API:
+
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+
+That is the whole list. The anon key is meant to be public; row level security
+is what protects the data. **Never put the service role key in a
+`NEXT_PUBLIC_` variable** - it bypasses RLS entirely and nothing in this app
+needs it.
+
+### 5. Both of you sign in, once
+
+1. One of you opens the app, signs in, and taps **Start a list**.
+2. Send the 6-character invite code to the other.
+3. They sign in and tap **Join your partner**, enter the code.
+
+Do this before step 6, or you will lock yourselves out.
+
+### 6. Close the door
+
+Authentication → Sign In / Providers → **disable new user signups**.
+
+This is the one real security exposure: a public URL with open registration
+lets anyone create an account. Two people are signed in, nobody else needs to
+be. Takes one click and is reversible.
+
+### 7. Turn on the keep-alive
+
+GitHub repo → Settings → Secrets and variables → Actions → New repository
+secret:
+
+- Name: `HEALTHCHECK_URL`
+- Value: `https://your-app.vercel.app/api/health`
+
+Then Actions → "Keep Supabase awake" → Run workflow, to check it works rather
+than finding out in seven days.
+
+### 8. Put it on your home screens
+
+Open the app in Safari (iOS) or Chrome (Android) → Share → Add to Home Screen.
+
+Do this on both phones. It is not cosmetic: **web push on iOS only works for
+apps installed to the home screen.** Without it you get the in-app toast and
+the tab badge, but nothing when the app is closed.
+
+## Things that will go wrong
+
+**The magic link does not arrive.** Supabase's built-in email service is rate
+limited to a handful of messages per hour and is explicitly not meant for
+production. For two people signing in a few times that is fine. Check spam
+first. If you hit the limit, wait an hour or connect your own SMTP under
+Authentication → Emails.
+
+**The link opens on an error page.** The redirect URL in step 3 does not match
+the deployed URL exactly. Vercel preview deployments get their own URLs, so
+either add them or test on the production URL.
+
+**Matches appear for one of you but not live for the other.** Realtime is
+published for `matches` by the migrations. Check Database → Replication that
+`supabase_realtime` includes it.
+
+**The app is down after a quiet fortnight.** The project paused. One click in
+the dashboard restores it, and step 7 is what stops it recurring.
 
 ## Limits change
 
