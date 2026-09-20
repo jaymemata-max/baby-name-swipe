@@ -101,9 +101,11 @@ npm run build
 
 ## Docs
 
+- [`AGENTS.md`](AGENTS.md) - orientation for coding agents: invariants, checks, lanes
 - [`docs/API.md`](docs/API.md) - every endpoint, with request and response shapes
 - [`docs/HOSTING.md`](docs/HOSTING.md) - deployment, free-tier limits, cost
 - [`docs/DECISIONS.md`](docs/DECISIONS.md) - why things are the way they are
+- [`docs/CODEX_PROMPT.md`](docs/CODEX_PROMPT.md) - task brief for a second agent
 
 ## Layout
 
