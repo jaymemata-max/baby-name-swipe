@@ -108,6 +108,7 @@ export type Database = {
         Returns: DeckCard[];
       };
       couple_stats: { Args: Record<string, never>; Returns: CoupleStats[] };
+      catalogue_size: { Args: Record<string, never>; Returns: number };
     };
     Enums: {
       name_gender: NameGender;
