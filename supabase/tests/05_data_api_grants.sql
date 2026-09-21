@@ -34,7 +34,26 @@ begin
     or has_table_privilege('anon', 'public.matches', 'SELECT') then
     raise exception 'anon must not read application tables';
   end if;
+
+  if not has_function_privilege('anon', 'public.catalogue_size()', 'EXECUTE') then
+    raise exception 'anon cannot execute the catalogue health check';
+  end if;
 end
 $$;
 
-\echo 'PASS Data API grants are explicit and keep matches trigger-owned'
+set role anon;
+
+do $$
+declare
+  catalogue_count integer;
+begin
+  select public.catalogue_size() into catalogue_count;
+  if catalogue_count <> 290 then
+    raise exception 'health check returned %, expected 290', catalogue_count;
+  end if;
+end
+$$;
+
+reset role;
+
+\echo 'PASS Data API grants are explicit, health is narrow, and matches stay trigger-owned'

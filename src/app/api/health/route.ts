@@ -11,14 +11,11 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   return route(async () => {
     const supabase = await createSupabaseServerClient();
-    const { count, error } = await supabase
-      .from("names")
-      .select("id", { count: "exact", head: true })
-      .is("couple_id", null);
+    const { data, error } = await supabase.rpc("catalogue_size");
 
     return ok({
       status: error ? "degraded" : "ok",
-      names_in_catalogue: count ?? 0,
+      names_in_catalogue: data ?? 0,
       checked_at: new Date().toISOString(),
     });
   });
