@@ -41,12 +41,20 @@ from public.names n
 join public.matches m on m.name_id = n.id
 where n.value = 'Noah' and n.gender = 'boy';
 
+do $$
+begin
+  if (select count(*) from public.names where couple_id is null) <> 290 then
+    raise exception 'Test must start with the original catalogue';
+  end if;
+end;
+$$;
+
 \ir ../migrations/20260921202500_expand_name_catalogue.sql
 
 do $$
 begin
   if (select count(*) from public.names where couple_id is null) <> 408 then
-    raise exception 'Catalogue count changed after reapplying migration';
+    raise exception 'Catalogue count incorrect after migration';
   end if;
   if exists (
     select 1 from public.names where couple_id is null
@@ -66,6 +74,16 @@ begin
     join public.matches m on m.id = b.match_id and m.name_id = n.id
   ) then
     raise exception 'Existing name or match ID changed';
+  end if;
+end;
+$$;
+
+\ir ../migrations/20260921202500_expand_name_catalogue.sql
+
+do $$
+begin
+  if (select count(*) from public.names where couple_id is null) <> 408 then
+    raise exception 'Reapplying migration changed catalogue size';
   end if;
 end;
 $$;
