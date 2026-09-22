@@ -6,7 +6,7 @@ import { DeckFilterPreferences, SwipeResponse, UndoSwipeResponse } from '@/lib/t
 
 const DEFAULT_FILTERS: DeckFilterPreferences = {
   gender: 'all',
-  languages: ['nl', 'en', 'es'],
+  languages: [],
 };
 
 const STORAGE_KEY = 'baby_names_deck_filters';
@@ -17,9 +17,12 @@ function loadStoredFilters(): DeckFilterPreferences {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_FILTERS;
     const parsed = JSON.parse(raw);
+    const languages = Array.isArray(parsed.languages) ? parsed.languages : [];
+    const wasOldDefault = !parsed.version && languages.length === 3 &&
+      ['nl', 'en', 'es'].every((lang) => languages.includes(lang));
     return {
       gender: parsed.gender || 'all',
-      languages: Array.isArray(parsed.languages) && parsed.languages.length > 0 ? parsed.languages : ['nl', 'en', 'es'],
+      languages: wasOldDefault ? [] : languages,
     };
   } catch {
     return DEFAULT_FILTERS;
@@ -42,7 +45,7 @@ export function useDeck(onMatchCelebration?: (data: SwipeResponse) => void) {
   // Save filters to localStorage whenever they change
   useEffect(() => {
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(filters));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...filters, version: 2 }));
     } catch {
       // ignore
     }

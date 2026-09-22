@@ -63,9 +63,7 @@ export function useMe() {
         throw new Error(err.error || 'Failed to update profile');
       }
       const json = await res.json();
-      if (json.profile && data) {
-        setData({ ...data, profile: json.profile });
-      }
+      if (json.profile) setData((current) => current ? { ...current, profile: json.profile } : current);
       return { success: true };
     } catch (err: unknown) {
       return { success: false, error: err instanceof Error ? err.message : 'Error' };
@@ -124,9 +122,7 @@ export function useMe() {
         throw new Error(err.error || 'Failed to update couple');
       }
       const json = await res.json();
-      if (json.couple && data) {
-        setData({ ...data, couple: json.couple });
-      }
+      if (json.couple) setData((current) => current ? { ...current, couple: json.couple } : current);
       return { success: true };
     } catch (err: unknown) {
       return { success: false, error: err instanceof Error ? err.message : 'Error' };
@@ -135,11 +131,16 @@ export function useMe() {
 
   const signOut = async () => {
     try {
-      await fetch('/api/auth/signout', { method: 'POST' });
+      const res = await fetch('/api/auth/signout', { method: 'POST' });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error || 'Could not sign out.');
+      }
       setData(null);
       setErrorCode('unauthorized');
-    } catch (err) {
-      console.error(err);
+      return { success: true };
+    } catch (err: unknown) {
+      return { success: false, error: err instanceof Error ? err.message : 'Could not sign out.' };
     }
   };
 

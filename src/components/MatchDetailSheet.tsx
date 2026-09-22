@@ -4,6 +4,7 @@ import type { MatchWithName } from '@/lib/types';
 
 import React, { useEffect, useState } from 'react';
 import { X, Heart, Star, Trash2, Check, AlertTriangle, MessageSquare } from 'lucide-react';
+import { nameGenderStyles } from '@/lib/nameGenderStyles';
 
 interface MatchDetailSheetProps {
   match: MatchWithName | null;
@@ -57,15 +58,7 @@ export const MatchDetailSheet: React.FC<MatchDetailSheetProps> = ({
     }
   };
 
-  const genderBadge = (() => {
-    if (match.name.gender === 'boy') {
-      return { label: 'Boy', bg: 'bg-[#fbf0eb] text-[#c05835]' };
-    }
-    if (match.name.gender === 'girl') {
-      return { label: 'Girl', bg: 'bg-[#faebf1] text-[#c4436c]' };
-    }
-    return { label: 'Unisex', bg: 'bg-[#fdf4eb] text-[#b36b28]' };
-  })();
+  const genderStyle = nameGenderStyles[match.name.gender];
 
   const dateFormatted = new Date(match.created_at).toLocaleDateString(undefined, {
     month: 'short',
@@ -84,8 +77,8 @@ export const MatchDetailSheet: React.FC<MatchDetailSheetProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between pb-4 border-b border-[#ebdcd4] dark:border-[#33242e]">
           <div className="flex items-center gap-2">
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${genderBadge.bg}`}>
-              {genderBadge.label}
+            <span className={`px-3 py-1 rounded-full border text-xs font-semibold ${genderStyle.badge}`}>
+              {genderStyle.label}
             </span>
             {match.is_love && (
               <span className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-rose-100 dark:bg-rose-950/80 text-rose-600 dark:text-rose-400">
@@ -123,15 +116,14 @@ export const MatchDetailSheet: React.FC<MatchDetailSheetProps> = ({
 
         {/* Hero Title */}
         <div className="mt-5 text-center">
-          <h2 className="text-4xl font-serif-name font-bold text-[#2b1b24] dark:text-[#f5edf2]">
+          <h2 className={`text-4xl font-serif-name font-bold ${genderStyle.name}`}>
             {match.name.value}
           </h2>
-          <p className="mt-2 text-base text-[#5c4755] dark:text-[#cfbecc] italic max-w-sm mx-auto">
+          {match.name.meaning && <p className="mt-2 text-base text-[#5c4755] dark:text-[#cfbecc] italic max-w-sm mx-auto">
             &ldquo;{match.name.meaning}&rdquo;
-          </p>
+          </p>}
           <div className="mt-3 flex items-center justify-center gap-3 text-xs text-[#806978] dark:text-[#a895a2]">
-            <span>Origin: {match.name.origin || 'Universal'}</span>
-            <span>•</span>
+            {match.name.origin && <><span>Origin: {match.name.origin}</span><span>•</span></>}
             <span>Matched on {dateFormatted}</span>
           </div>
         </div>

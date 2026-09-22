@@ -10,9 +10,9 @@ interface SettingsTabProps {
   couple: Couple | null;
   partner: { id: string; display_name: string; avatar_emoji: string } | null;
   stats: CoupleStats | null;
-  onUpdateProfile: (name?: string, emoji?: string) => Promise<{ success: boolean }>;
-  onUpdateCouple: (title?: string, dueDate?: string | null) => Promise<{ success: boolean }>;
-  onSignOut: () => Promise<void>;
+  onUpdateProfile: (name?: string, emoji?: string) => Promise<{ success: boolean; error?: string }>;
+  onUpdateCouple: (title?: string, dueDate?: string | null) => Promise<{ success: boolean; error?: string }>;
+  onSignOut: () => Promise<{ success: boolean; error?: string }>;
 }
 
 const EMOJI_OPTIONS = ['🤰', '👨', '👩', '👶', '🍼', '🐣', '🧸', '✨', '💛', '🌸', '🌿', '🦁'];
@@ -33,12 +33,20 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
   const [copiedCode, setCopiedCode] = useState(false);
   const [savedProfile, setSavedProfile] = useState(false);
   const [savedCouple, setSavedCouple] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
+  const [coupleError, setCoupleError] = useState<string | null>(null);
+  const [inviteError, setInviteError] = useState<string | null>(null);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingCouple, setSavingCouple] = useState(false);
+  const [signOutError, setSignOutError] = useState<string | null>(null);
+  const [signingOut, setSigningOut] = useState(false);
 
   const { isInstallable, isInstalled, isIOS, install } = usePWAInstall();
   const [showIOSGuide, setShowIOSGuide] = useState(false);
 
   const handleCopyInvite = async () => {
     if (!couple?.invite_code) return;
+    setInviteError(null);
     const textToShare = `Join our baby name shortlist on Baby Names! Our invite code is: ${couple.invite_code}`;
 
     if (navigator.share) {
@@ -58,23 +66,52 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
       setCopiedCode(true);
       setTimeout(() => setCopiedCode(false), 2500);
     } catch {
-      // ignore
+      setInviteError('Could not copy the code. Please select it manually.');
     }
   };
 
   const handleSaveProfile = async () => {
-    const res = await onUpdateProfile(displayName, avatarEmoji);
-    if (res.success) {
+    setSavingProfile(true);
+    setProfileError(null);
+    setSavedProfile(false);
+    try {
+      const res = await onUpdateProfile(displayName, avatarEmoji);
+      if (!res.success) throw new Error(res.error || 'Could not save profile.');
       setSavedProfile(true);
       setTimeout(() => setSavedProfile(false), 2000);
+    } catch (err) {
+      setProfileError(err instanceof Error ? err.message : 'Could not save profile.');
+    } finally {
+      setSavingProfile(false);
     }
   };
 
   const handleSaveCouple = async () => {
-    const res = await onUpdateCouple(coupleTitle, dueDate || null);
-    if (res.success) {
+    setSavingCouple(true);
+    setCoupleError(null);
+    setSavedCouple(false);
+    try {
+      const res = await onUpdateCouple(coupleTitle, dueDate || null);
+      if (!res.success) throw new Error(res.error || 'Could not save couple details.');
       setSavedCouple(true);
       setTimeout(() => setSavedCouple(false), 2000);
+    } catch (err) {
+      setCoupleError(err instanceof Error ? err.message : 'Could not save couple details.');
+    } finally {
+      setSavingCouple(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    setSignOutError(null);
+    try {
+      const res = await onSignOut();
+      if (!res.success) setSignOutError(res.error || 'Could not sign out.');
+    } catch (err) {
+      setSignOutError(err instanceof Error ? err.message : 'Could not sign out.');
+    } finally {
+      setSigningOut(false);
     }
   };
 
@@ -128,7 +165,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               <div className="text-[10px] uppercase font-bold text-[#8c7483] dark:text-[#9e8b98]">
                 Invite Code
               </div>
-              <div className="text-2xl font-mono font-extrabold tracking-widest text-[#2b1b24] dark:text-[#f5edf2]">
+              <div className="text-2xl font-mono font-extrabold tracking-widest text-[#2b1b24] dark:text-[#f5edf2] select-text">
                 {couple.invite_code}
               </div>
             </div>
@@ -152,6 +189,7 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
               )}
             </button>
           </div>
+          {inviteError && <p role="alert" className="mt-2 text-xs text-rose-700 dark:text-rose-300">{inviteError}</p>}
         </div>
       )}
 
@@ -202,10 +240,12 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
           type="button"
           id="btn-save-profile"
           onClick={handleSaveProfile}
+          disabled={savingProfile}
           className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#e25567] hover:bg-[#d24255] text-white shadow-xs transition-all"
         >
-          {savedProfile ? 'Profile Saved!' : 'Update Profile'}
+          {savingProfile ? 'Saving...' : savedProfile ? 'Profile Saved!' : 'Update Profile'}
         </button>
+        {profileError && <p role="alert" className="mt-2 text-xs text-rose-700 dark:text-rose-300">{profileError}</p>}
       </div>
 
       {/* Couple Preferences */}
@@ -246,10 +286,12 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
             type="button"
             id="btn-save-couple"
             onClick={handleSaveCouple}
+            disabled={savingCouple}
             className="w-full py-2.5 rounded-xl text-xs font-bold bg-[#c05835] hover:bg-[#a84c2d] text-white shadow-xs transition-all"
           >
-            {savedCouple ? 'Couple Saved!' : 'Save Couple Info'}
+            {savingCouple ? 'Saving...' : savedCouple ? 'Couple Saved!' : 'Save Couple Info'}
           </button>
+          {coupleError && <p role="alert" className="mt-2 text-xs text-rose-700 dark:text-rose-300">{coupleError}</p>}
         </div>
       )}
 
@@ -347,12 +389,14 @@ export const SettingsTab: React.FC<SettingsTabProps> = ({
         <button
           type="button"
           id="btn-settings-signout"
-          onClick={onSignOut}
+          onClick={handleSignOut}
+          disabled={signingOut}
           className="w-full py-3 rounded-xl text-xs font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-950/70 border border-rose-200 dark:border-rose-900/60 flex items-center justify-center gap-2 transition-colors"
         >
           <LogOut className="w-4 h-4" />
-          Sign Out
+          {signingOut ? 'Signing out...' : 'Sign Out'}
         </button>
+        {signOutError && <p role="alert" className="mt-2 text-xs text-rose-700 dark:text-rose-300">{signOutError}</p>}
       </div>
     </div>
   );

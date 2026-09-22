@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
 import { BabyName, NameGender } from '@/lib/supabase/database.types';
+import { nameGenderStyles } from '@/lib/nameGenderStyles';
 
 interface AddNameSheetProps {
   isOpen: boolean;
@@ -167,7 +168,7 @@ export const AddNameSheet: React.FC<AddNameSheetProps> = ({
                   onClick={() => setGender(g.id)}
                   className={`py-2.5 rounded-xl text-xs font-bold border transition-all ${
                     gender === g.id
-                      ? 'bg-white dark:bg-[#2c202a] border-[#e25567] text-[#2b1b24] dark:text-white shadow-xs'
+                      ? nameGenderStyles[g.id].selected
                       : 'bg-[#f4e8e1]/60 dark:bg-[#251b22] border-transparent text-[#735e6c] dark:text-[#a895a2]'
                   }`}
                 >
@@ -250,8 +251,8 @@ export const AddNameSheet: React.FC<AddNameSheetProps> = ({
                 >
                   <div>
                     <span className="font-bold text-[#2b1b24] dark:text-[#f5edf2]">{n.value}</span>
-                    <span className="text-xs text-[#735e6c] dark:text-[#b09eac] ml-2">
-                      ({n.gender})
+                    <span className={`text-xs font-semibold ml-2 ${nameGenderStyles[n.gender].name}`}>
+                      ({nameGenderStyles[n.gender].label})
                     </span>
                   </div>
                   <button

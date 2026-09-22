@@ -18,6 +18,9 @@ export async function GET() {
       supabase.from("profiles").select("*").eq("couple_id", profile.couple_id),
       supabase.rpc("couple_stats"),
     ]);
+    if (coupleResult.error) throw new Error(coupleResult.error.message);
+    if (membersResult.error) throw new Error(membersResult.error.message);
+    if (statsResult.error) throw new Error(statsResult.error.message);
 
     const partner =
       membersResult.data?.find((member) => member.id !== profile.id) ?? null;

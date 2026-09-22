@@ -61,8 +61,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
   ) : null;
 
   const handleSwipeAction = async (dir: 'like' | 'pass' | 'love') => {
-    setMySwipedSessionCount((prev) => prev + 1);
-    await swipe(dir);
+    if (await swipe(dir)) setMySwipedSessionCount((prev) => prev + 1);
   };
 
   return (
@@ -115,7 +114,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
             className="w-9 h-9 rounded-full flex items-center justify-center bg-white dark:bg-[#251d23] border border-[#ebdcd4] dark:border-[#382b35] text-[#735e6c] dark:text-[#beabb8] hover:text-[#c05835] shadow-xs active:scale-95 transition-all relative"
           >
             <SlidersHorizontal className="w-4 h-4" />
-            {filters.languages.length < 4 && (
+            {(filters.gender !== 'all' || filters.languages.length > 0) && (
               <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#c05835]" />
             )}
           </button>

@@ -4,6 +4,7 @@ import React from 'react';
 import { X, SlidersHorizontal, Check } from 'lucide-react';
 import { DeckFilterPreferences } from '@/lib/types';
 import { NameLanguage } from '@/lib/supabase/database.types';
+import { nameGenderStyles } from '@/lib/nameGenderStyles';
 
 interface DeckFiltersSheetProps {
   isOpen: boolean;
@@ -30,8 +31,6 @@ export const DeckFiltersSheet: React.FC<DeckFiltersSheetProps> = ({
   const toggleLanguage = (lang: NameLanguage) => {
     let updated: NameLanguage[];
     if (filters.languages.includes(lang)) {
-      // Don't allow unselecting all
-      if (filters.languages.length <= 1) return;
       updated = filters.languages.filter((l) => l !== lang);
     } else {
       updated = [...filters.languages, lang];
@@ -71,12 +70,13 @@ export const DeckFiltersSheet: React.FC<DeckFiltersSheetProps> = ({
           <label className="block text-sm font-semibold uppercase tracking-wider text-[#796270] dark:text-[#ad9ba6] mb-3">
             Gender
           </label>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {(
               [
                 { id: 'all', label: 'Both' },
                 { id: 'boy', label: 'Boys' },
                 { id: 'girl', label: 'Girls' },
+                { id: 'unisex', label: 'Unisex' },
               ] as const
             ).map((opt) => {
               const active = filters.gender === opt.id;
@@ -86,9 +86,11 @@ export const DeckFiltersSheet: React.FC<DeckFiltersSheetProps> = ({
                   type="button"
                   id={`filter-gender-${opt.id}`}
                   onClick={() => onUpdateFilters({ gender: opt.id })}
-                  className={`py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-150 border ${
+                  className={`py-3 px-1 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150 border ${
                     active
-                      ? 'bg-white dark:bg-[#2c202a] border-[#c05835] dark:border-[#ea7a56] text-[#2b1b24] dark:text-white shadow-xs'
+                      ? opt.id === 'all'
+                        ? 'bg-white dark:bg-[#2c202a] border-[#c05835] dark:border-[#ea7a56] text-[#2b1b24] dark:text-white shadow-xs'
+                        : nameGenderStyles[opt.id].selected
                       : 'bg-[#f4e8e1]/70 dark:bg-[#251b22] border-transparent text-[#6e5966] dark:text-[#a895a2] hover:bg-[#ede0d8]'
                   }`}
                 >
@@ -106,12 +108,25 @@ export const DeckFiltersSheet: React.FC<DeckFiltersSheetProps> = ({
               Languages
             </label>
             <span className="text-xs text-[#8c7483] dark:text-[#998794]">
-              Selected: {filters.languages.length}
+              {filters.languages.length === 0 ? 'All names' : `Selected: ${filters.languages.length}`}
             </span>
           </div>
           <p className="text-xs text-[#6e5966] dark:text-[#bda9b7] mb-3">
-            Only names we can all pronounce.
+            With languages selected, names must work in every selected language.
           </p>
+
+          <button
+            type="button"
+            id="filter-all-languages"
+            onClick={() => onUpdateFilters({ languages: [] })}
+            className={`w-full mb-2.5 p-3 rounded-xl border text-left text-sm font-semibold ${
+              filters.languages.length === 0
+                ? 'bg-white dark:bg-[#2c202a] border-[#e25567] dark:border-[#ff6a80] text-[#2b1b24] dark:text-white'
+                : 'bg-[#f4e8e1]/60 dark:bg-[#241a21] border-transparent text-[#6e5966] dark:text-[#bda9b7]'
+            }`}
+          >
+            All names
+          </button>
 
           <div className="grid grid-cols-2 gap-2.5">
             {LANGUAGES.map((lang) => {

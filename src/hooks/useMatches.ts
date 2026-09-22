@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { MatchesResponse, MatchWithName } from '@/lib/types';
 
-export function useMatches(genderFilter: 'all' | 'boy' | 'girl' = 'all', shortlistedOnly = false) {
+export function useMatches(genderFilter: 'all' | 'boy' | 'girl' | 'unisex' = 'all', shortlistedOnly = false) {
   const [matches, setMatches] = useState<MatchWithName[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
