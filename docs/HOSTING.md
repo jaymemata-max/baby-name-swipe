@@ -108,7 +108,7 @@ ones depend on the earlier ones.
 Check it worked:
 
 ```sql
-select count(*) from names;                      -- 290
+select count(*) from names;                      -- 408 after all migrations
 select count(*) from names where works_in @> '{en,es,nl}';  -- 173
 ```
 

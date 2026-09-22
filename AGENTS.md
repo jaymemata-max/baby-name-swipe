@@ -56,7 +56,7 @@ src/lib/api.ts        session helpers, ApiError -> HTTP mapping
 src/lib/schemas.ts    zod request validation
 src/lib/types.ts      API envelope types
 src/lib/supabase/     server, browser and middleware clients + row types
-supabase/migrations/  schema, RLS, functions, name catalogue (5 files)
+supabase/migrations/  schema, RLS, functions, name catalogue
 supabase/tests/       schema tests, run against a throwaway Postgres
 ```
 
@@ -66,10 +66,10 @@ supabase/tests/       schema tests, run against a throwaway Postgres
 npm run typecheck
 npm run lint            # 0 errors; a handful of unused-var warnings are known
 npm run build           # needs NEXT_PUBLIC_SUPABASE_* set to anything
-./scripts/test-schema.sh   # 4 suites, needs postgres server binaries, not Docker
+./scripts/test-schema.sh   # needs postgres server binaries, not Docker
 ```
 
-`test-schema.sh` builds a disposable cluster, applies all five migrations
+`test-schema.sh` builds a disposable cluster, applies all migrations
 against a stubbed `auth` schema, and impersonates users with
 `set local test.uid = '<uuid>'`. It needs to run as a non-root user.
 
@@ -89,17 +89,17 @@ so drift between the two is how the frontend silently breaks.
 ## Migrations
 
 Additive only, new file with a later timestamp. The catalogue is a migration
-(`20260913120300_seed_names.sql` plus the language tagging in
-`20260920100000_name_languages.sql`), not a seed script, so it deploys
+(`20260913120300_seed_names.sql`, language tagging in
+`20260920100000_name_languages.sql`, and later additions), not a seed script, so it deploys
 everywhere. Editing an applied migration in place will not reapply.
 
 ## Name catalogue
 
-290 names, each tagged `works_in text[]` with the languages a native speaker
+408 names, each tagged `works_in text[]` with the languages a native speaker
 can pronounce it in naturally: `en`, `es`, `nl`, `fr`. It means sayable, not
 identical - `Julia` is all four, `Gijs` is Dutch only. The couple speaks
-Dutch, English and Spanish, so the deck defaults to `en,es,nl`, which leaves
-173 names. Retagging one name is a single `UPDATE`.
+Dutch, English and Spanish. The deck shows all names by default; choosing
+`en,es,nl` narrows it to 173. Retagging one name requires a new migration.
 
 ## Known open risk
 

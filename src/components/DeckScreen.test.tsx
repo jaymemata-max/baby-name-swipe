@@ -38,6 +38,45 @@ function DeckProbe() {
 }
 
 describe('DeckScreen', () => {
+  it('loads the full catalogue by default', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ cards: baseCards }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<DeckProbe />);
+    await screen.findByText(/Name 1\|Name 2/);
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/deck?gender=all&limit=25');
+  });
+
+  it('opens the old default language filter without losing the gender choice', async () => {
+    localStorage.setItem('baby_names_deck_filters', JSON.stringify({
+      gender: 'girl', languages: ['nl', 'en', 'es'],
+    }));
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ cards: baseCards }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<DeckProbe />);
+    await screen.findByText(/Name 1\|Name 2/);
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/deck?gender=girl&limit=25');
+    expect(JSON.parse(localStorage.getItem('baby_names_deck_filters') || '{}')).toEqual({
+      gender: 'girl', languages: [], version: 2,
+    });
+  });
+
+  it('keeps a deliberately selected language filter', async () => {
+    localStorage.setItem('baby_names_deck_filters', JSON.stringify({
+      gender: 'all', languages: ['es'],
+    }));
+    const fetchMock = vi.fn().mockResolvedValue(jsonResponse({ cards: baseCards }));
+    vi.stubGlobal('fetch', fetchMock);
+
+    render(<DeckProbe />);
+    await screen.findByText(/Name 1\|Name 2/);
+
+    expect(fetchMock).toHaveBeenCalledWith('/api/deck?gender=all&limit=25&languages=es');
+  });
+
   it('renders a card, posts the swipe body, and removes it optimistically', async () => {
     const user = userEvent.setup();
     const post = deferred<Response>();

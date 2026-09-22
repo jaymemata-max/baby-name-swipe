@@ -8,15 +8,15 @@ answers until then - so nobody is nudged into agreeing.
 
 ## Status
 
-**Backend and UI are in. Not yet deployed.**
+**Deployed on Vercel with Supabase.**
 
 - [x] Schema, row level security, match logic
 - [x] REST API for onboarding, deck, swipes, matches, custom names
-- [x] 290-name catalogue, tagged by which languages it is pronounceable in
+- [x] 408-name catalogue, tagged by which languages it is pronounceable in
 - [x] Schema tests covering matching, security and the couple rules
 - [x] Swipe deck, match celebration, shortlist, settings, onboarding
 - [x] Realtime "it's a match" toast over Supabase Realtime
-- [ ] Deployed to Vercel with a real Supabase project
+- [x] Deployed to Vercel with a real Supabase project
 - [ ] Web push for when the app is closed (toast + title badge works today)
 
 The UI was generated from [`docs/AI_STUDIO_PROMPT.md`](docs/AI_STUDIO_PROMPT.md)

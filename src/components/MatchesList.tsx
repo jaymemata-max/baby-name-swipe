@@ -7,13 +7,14 @@ import { Star, Heart, MessageSquare, ChevronRight, HeartHandshake } from 'lucide
 import { useMatches } from '@/hooks/useMatches';
 
 import { MatchDetailSheet } from '@/components/MatchDetailSheet';
+import { nameGenderStyles } from '@/lib/nameGenderStyles';
 
 interface MatchesListProps {
   onGoToDeck: () => void;
 }
 
 export const MatchesList: React.FC<MatchesListProps> = ({ onGoToDeck }) => {
-  const [genderFilter, setGenderFilter] = useState<'all' | 'boy' | 'girl'>('all');
+  const [genderFilter, setGenderFilter] = useState<'all' | 'boy' | 'girl' | 'unisex'>('all');
   const [shortlistedOnly, setShortlistedOnly] = useState(false);
   const [selectedMatch, setSelectedMatch] = useState<MatchWithName | null>(null);
 
@@ -51,13 +52,14 @@ export const MatchesList: React.FC<MatchesListProps> = ({ onGoToDeck }) => {
         </button>
       </div>
 
-      {/* Segmented Control: All / Boys / Girls */}
-      <div className="grid grid-cols-3 gap-1.5 p-1 rounded-2xl bg-[#f4e8e1]/70 dark:bg-[#251b22] border border-[#ecd9d0] dark:border-[#3a2d36] mb-4">
+      {/* Segmented Control: All / Boys / Girls / Unisex */}
+      <div className="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-[#f4e8e1]/70 dark:bg-[#251b22] border border-[#ecd9d0] dark:border-[#3a2d36] mb-4">
         {(
           [
             { id: 'all', label: 'All' },
             { id: 'boy', label: 'Boys' },
             { id: 'girl', label: 'Girls' },
+            { id: 'unisex', label: 'Unisex' },
           ] as const
         ).map((tab) => {
           const active = genderFilter === tab.id;
@@ -67,9 +69,11 @@ export const MatchesList: React.FC<MatchesListProps> = ({ onGoToDeck }) => {
               type="button"
               id={`segment-match-${tab.id}`}
               onClick={() => setGenderFilter(tab.id)}
-              className={`py-2 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+              className={`py-2 px-0.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                 active
-                  ? 'bg-white dark:bg-[#30232d] text-[#2b1b24] dark:text-[#f5edf2] shadow-xs'
+                  ? tab.id === 'all'
+                    ? 'bg-white dark:bg-[#30232d] text-[#2b1b24] dark:text-[#f5edf2] shadow-xs'
+                    : nameGenderStyles[tab.id].selected
                   : 'text-[#7d6676] dark:text-[#a895a2] hover:text-[#2b1b24]'
               }`}
             >
@@ -137,25 +141,19 @@ export const MatchesList: React.FC<MatchesListProps> = ({ onGoToDeck }) => {
               day: 'numeric',
             });
 
-            const isBoy = match.name.gender === 'boy';
-            const isGirl = match.name.gender === 'girl';
-            const genderDot = isBoy
-              ? 'bg-[#c05835]'
-              : isGirl
-              ? 'bg-[#c4436c]'
-              : 'bg-[#b36b28]';
+            const genderStyle = nameGenderStyles[match.name.gender];
 
             return (
               <div
                 key={match.id}
                 id={`match-row-${match.id}`}
                 onClick={() => setSelectedMatch(match)}
-                className="p-4 rounded-2xl bg-white dark:bg-[#231b21] border border-[#f0ded7] dark:border-[#382b35] hover:border-[#e25567] dark:hover:border-[#ff6a80] transition-all shadow-xs flex items-center justify-between cursor-pointer group"
+                className={`p-4 rounded-2xl border ${genderStyle.card} transition-all shadow-xs flex items-center justify-between cursor-pointer group`}
               >
                 {/* Name & details */}
                 <div className="flex-1 pr-3 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${genderDot} shrink-0`} />
+                    <span className={`w-2 h-2 rounded-full ${genderStyle.dot} shrink-0`} />
                     <h3 className="text-xl font-serif-name font-bold text-[#2b1b24] dark:text-[#f5edf2] truncate">
                       {match.name.value}
                     </h3>
@@ -171,13 +169,12 @@ export const MatchesList: React.FC<MatchesListProps> = ({ onGoToDeck }) => {
                     )}
                   </div>
 
-                  <p className="text-xs text-[#6e5966] dark:text-[#bda9b7] mt-0.5 line-clamp-1 italic">
+                  {match.name.meaning && <p className="text-xs text-[#6e5966] dark:text-[#bda9b7] mt-0.5 line-clamp-1 italic">
                     &ldquo;{match.name.meaning}&rdquo;
-                  </p>
+                  </p>}
 
                   <div className="flex items-center gap-2 mt-1 text-[11px] text-[#8e7687] dark:text-[#9e8b98]">
-                    <span>{match.name.origin || 'Origin'}</span>
-                    <span>•</span>
+                    {match.name.origin && <><span>{match.name.origin}</span><span>•</span></>}
                     <span>Matched {dateStr}</span>
                     {match.note && (
                       <>

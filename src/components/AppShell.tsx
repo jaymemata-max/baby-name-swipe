@@ -45,6 +45,9 @@ export function AppShell() {
     if (tab === 'matches') {
       setMatchesBadgeCount(0);
     }
+    if (tab === 'settings') {
+      void refresh();
+    }
     setCurrentTab(tab);
   };
 

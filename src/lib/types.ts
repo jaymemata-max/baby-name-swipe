@@ -78,6 +78,6 @@ export interface ApiError {
 }
 
 export interface DeckFilterPreferences {
-  gender: 'all' | 'boy' | 'girl';
+  gender: 'all' | 'boy' | 'girl' | 'unisex';
   languages: NameLanguage[];
 }

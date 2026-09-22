@@ -6,7 +6,8 @@ export const dynamic = "force-dynamic";
 export async function POST() {
   return route(async () => {
     const supabase = await createSupabaseServerClient();
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+    if (error) throw new Error(error.message);
     return ok({ signed_out: true });
   });
 }
