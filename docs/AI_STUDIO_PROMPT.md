@@ -87,7 +87,7 @@ Body: `{ "title"?: string, "due_date"?: "YYYY-MM-DD"|null }`
 - `gender`: `all` | `boy` | `girl` | `unisex`. `boy` and `girl` both include
   unisex names.
 - `limit`: 1-100, default 25
-- `languages`: comma-separated subset of `en,es,nl,fr`. Only deals names a
+- `languages`: comma-separated subset of `en,es,nl,fr,pt`. Only deals names a
   native speaker of **every** listed language can pronounce naturally. Omit
   for the whole catalogue.
 
@@ -194,7 +194,7 @@ This is where they will spend 95% of their time. Make it excellent.
 - One large card at a time, with the next two visible behind it, slightly
   scaled down and offset. Do not render more than 3 in the DOM.
 - Card shows: the name, large; the meaning; the origin; small flag-ish or
-  letter chips for `works_in` (EN / ES / NL / FR); a subtle marker when
+  letter chips for `works_in` (EN / ES / NL / FR / PT); a subtle marker when
   `is_custom` is true.
 - Swipe right = like, left = pass, up = love. Dragging shows a colour tint and
   a label ("YES" / "NO" / "LOVE") that fades in with drag distance, with a

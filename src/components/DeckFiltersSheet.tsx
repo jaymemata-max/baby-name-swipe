@@ -18,6 +18,7 @@ const LANGUAGES: { id: NameLanguage; name: string; nativeName: string; flag: str
   { id: 'en', name: 'English', nativeName: 'English', flag: '🇬🇧' },
   { id: 'es', name: 'Spanish', nativeName: 'Español', flag: '🇪🇸' },
   { id: 'fr', name: 'French', nativeName: 'Français', flag: '🇫🇷' },
+  { id: 'pt', name: 'Portuguese', nativeName: 'Português (Brasil)', flag: '🇧🇷' },
 ];
 
 export const DeckFiltersSheet: React.FC<DeckFiltersSheetProps> = ({

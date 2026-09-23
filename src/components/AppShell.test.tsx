@@ -38,7 +38,7 @@ describe('AppShell gates', () => {
       profile: makeProfile({ couple_id: 'couple-1' }),
       couple: makeCouple(),
       partner: null,
-      stats: { total_names: 408, my_swipes, partner_swipes: 3, my_likes: 4, matches: 2, shortlisted: 1 },
+      stats: { total_names: 422, my_swipes, partner_swipes: 3, my_likes: 4, matches: 2, shortlisted: 1 },
     });
     const fetchMock = vi.fn()
       .mockResolvedValueOnce(me(1))

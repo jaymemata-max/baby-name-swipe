@@ -28,8 +28,11 @@ describe('MatchesList', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     render(<MatchesList onGoToDeck={vi.fn()} />);
-    expect(await screen.findByText('Name 1')).toBeInTheDocument();
-    expect(screen.getByText('Name 2')).toBeInTheDocument();
+    expect(await screen.findByText('Name 1 Mata')).toBeInTheDocument();
+    expect(screen.getByText('Name 2 Mata')).toBeInTheDocument();
+    expect(screen.getByText('Name 1 Mata')).toHaveClass('break-words');
+    expect(document.getElementById('screen-our-list')).toHaveClass('min-h-0', 'overflow-hidden');
+    expect(screen.getByTestId('matches-scroll-region')).toHaveClass('flex-1', 'min-h-0', 'overflow-y-auto');
 
     await user.click(screen.getAllByRole('button', { name: 'Add to shortlist' })[0]);
     expect(screen.getByRole('button', { name: 'Remove from shortlist' })).toBeInTheDocument();
@@ -41,7 +44,7 @@ describe('MatchesList', () => {
       }),
     ));
 
-    await user.click(screen.getByText('Name 1'));
+    await user.click(screen.getByText('Name 1 Mata'));
     const note = screen.getByLabelText('Shared Note');
     await user.type(note, 'Works with the family name');
     await user.tab();
@@ -56,7 +59,7 @@ describe('MatchesList', () => {
     await user.click(screen.getByRole('button', { name: 'Close detail' }));
     await user.click(screen.getByRole('button', { name: 'Boys' }));
     await waitFor(() => expect(fetchMock).toHaveBeenCalledWith('/api/matches?gender=boy'));
-    expect(await screen.findByText('Name 2')).toBeInTheDocument();
+    expect(await screen.findByText('Name 2 Mata')).toBeInTheDocument();
   });
 
   it('shows the empty state when no matches exist', async () => {

@@ -64,6 +64,15 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
     if (await swipe(dir)) setMySwipedSessionCount((prev) => prev + 1);
   };
 
+  const handleShowAllNames = () => {
+    if (filters.gender === 'all' && filters.languages.length === 0) {
+      void reloadDeck();
+      return;
+    }
+
+    updateFilters({ gender: 'all', languages: [] });
+  };
+
   return (
     <div
       id="screen-deck"
@@ -144,7 +153,7 @@ export const DeckScreen: React.FC<DeckScreenProps> = ({
             stats={stats}
             mySwipesCount={mySwipedSessionCount}
             onOpenAddName={() => setShowAddName(true)}
-            onOpenFilters={() => setShowFilters(true)}
+            onShowAllNames={handleShowAllNames}
           />
         ) : (
           /* Swipable Card Stack: render top 2 cards */

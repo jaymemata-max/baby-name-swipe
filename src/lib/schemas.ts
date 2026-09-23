@@ -50,7 +50,7 @@ export const updateMatchSchema = z
   })
   .refine((value) => Object.keys(value).length > 0, "Nothing to update");
 
-export const languageSchema = z.enum(["en", "es", "nl", "fr"]);
+export const languageSchema = z.enum(["en", "es", "nl", "fr", "pt"]);
 
 /**
  * Comma-separated language codes, e.g. "en,es,nl". A name is only dealt if a
@@ -66,7 +66,7 @@ export const languageListSchema = z
       .map((code) => code.trim().toLowerCase())
       .filter(Boolean),
   )
-  .pipe(z.array(languageSchema).max(4));
+  .pipe(z.array(languageSchema).max(5));
 
 export const deckQuerySchema = z.object({
   gender: genderFilterSchema.default("all"),

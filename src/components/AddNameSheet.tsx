@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2, Sparkles, CheckCircle2, AlertCircle } from 'lucide-react';
 import { BabyName, NameGender } from '@/lib/supabase/database.types';
 import { nameGenderStyles } from '@/lib/nameGenderStyles';
+import { formatBabyName } from '@/lib/babyNameDisplay';
 
 interface AddNameSheetProps {
   isOpen: boolean;
@@ -250,7 +251,7 @@ export const AddNameSheet: React.FC<AddNameSheetProps> = ({
                   className="flex items-center justify-between p-2.5 rounded-xl bg-white dark:bg-[#261c24] border border-[#ebdcd4] dark:border-[#382b35] text-sm"
                 >
                   <div>
-                    <span className="font-bold text-[#2b1b24] dark:text-[#f5edf2]">{n.value}</span>
+                    <span className="font-bold text-[#2b1b24] dark:text-[#f5edf2]">{formatBabyName(n.value)}</span>
                     <span className={`text-xs font-semibold ml-2 ${nameGenderStyles[n.gender].name}`}>
                       ({nameGenderStyles[n.gender].label})
                     </span>

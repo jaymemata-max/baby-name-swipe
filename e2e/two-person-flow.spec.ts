@@ -59,6 +59,7 @@ test.describe('two-person match flow against local Supabase', () => {
     const firstEmail = `jayme-${suffix}@example.test`;
     const secondEmail = `merel-${suffix}@example.test`;
     const sharedName = `Codex${String(suffix).slice(-7)}`;
+    const displayedName = `${sharedName} Mata`;
 
     const firstContext = await browser.newContext();
     const secondContext = await browser.newContext();
@@ -85,19 +86,19 @@ test.describe('two-person match flow against local Supabase', () => {
       await first.getByRole('button', { name: 'Add to Both Decks' }).click();
       await expect(first.getByText(/still need to swipe it/i)).toBeVisible();
       await first.locator('#btn-close-add-name').click();
-      await expect(first.getByRole('heading', { name: sharedName })).toBeVisible();
+      await expect(first.getByRole('heading', { name: displayedName })).toBeVisible();
 
       await second.reload();
-      await expect(second.getByRole('heading', { name: sharedName })).toBeVisible();
+      await expect(second.getByRole('heading', { name: displayedName })).toBeVisible();
 
       await first.getByRole('button', { name: 'Like this name' }).click();
       await second.getByRole('button', { name: 'Like this name' }).click();
       await expect(second.getByText("It's a Match!")).toBeVisible();
       await second.getByRole('button', { name: 'See Our Shared List' }).click();
-      await expect(second.getByRole('heading', { name: sharedName })).toBeVisible();
+      await expect(second.getByRole('heading', { name: displayedName })).toBeVisible();
 
       await first.getByRole('button', { name: 'View matches list' }).click();
-      await expect(first.getByRole('heading', { name: sharedName })).toBeVisible();
+      await expect(first.getByRole('heading', { name: displayedName })).toBeVisible();
     } finally {
       await firstContext.close();
       await secondContext.close();

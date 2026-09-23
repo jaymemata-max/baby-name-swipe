@@ -5,6 +5,7 @@ import confetti from 'canvas-confetti';
 import { Heart, ArrowRight, X } from 'lucide-react';
 import { SwipeResponse } from '@/lib/types';
 import { Profile } from '@/lib/supabase/database.types';
+import { formatBabyName } from '@/lib/babyNameDisplay';
 
 interface MatchCelebrationModalProps {
   matchData: SwipeResponse;
@@ -99,8 +100,8 @@ export const MatchCelebrationModal: React.FC<MatchCelebrationModalProps> = ({
 
         {/* Hero Name */}
         <div className="my-5 py-4 px-2 rounded-2xl bg-white dark:bg-[#281b25] border border-[#ebdcd4] dark:border-[#3d2b38] shadow-xs">
-          <h2 className="text-4xl sm:text-5xl font-serif-name font-extrabold text-[#2b1b24] dark:text-[#f5edf2] tracking-tight">
-            {matchedName.value}
+          <h2 className="text-4xl sm:text-5xl font-serif-name font-extrabold text-[#2b1b24] dark:text-[#f5edf2] break-words">
+            {formatBabyName(matchedName.value)}
           </h2>
           <p className="text-sm text-[#6e5966] dark:text-[#bba7b4] mt-2 italic max-w-[240px] mx-auto">
             &ldquo;{matchedName.meaning}&rdquo;

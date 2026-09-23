@@ -4,7 +4,7 @@
  */
 
 export type NameGender = "boy" | "girl" | "unisex";
-export type NameLanguage = "en" | "es" | "nl" | "fr";
+export type NameLanguage = "en" | "es" | "nl" | "fr" | "pt";
 export type SwipeDirection = "pass" | "like" | "love";
 
 export type Couple = {
