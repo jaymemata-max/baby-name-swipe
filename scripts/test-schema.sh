@@ -34,7 +34,10 @@ for test_file in "$ROOT"/supabase/tests/0[1-9]_*.sql; do
     -c "create database babyname_test;" >/dev/null
 
   for setup in "$ROOT/supabase/tests/00_supabase_stub.sql" "$ROOT"/supabase/migrations/*.sql; do
-    if [[ "$name" == "06_catalogue_growth.sql" && "$setup" == */20260921202500_expand_name_catalogue.sql ]]; then
+    if [[ "$name" == "06_catalogue_growth.sql" && (
+      "$setup" == */20260921202500_expand_name_catalogue.sql ||
+      "$setup" == */20260923095707_add_brazilian_names.sql
+    ) ]]; then
       continue
     fi
     "${PSQL[@]}" -d babyname_test -v ON_ERROR_STOP=1 -q -f "$setup" >/dev/null

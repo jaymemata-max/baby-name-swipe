@@ -22,4 +22,10 @@ describe('DeckCard gender colors', () => {
     expect(screen.queryByText('Universal')).not.toBeInTheDocument();
     expect(screen.queryByText('“”')).not.toBeInTheDocument();
   });
+
+  it('shows the given name together with the family name', () => {
+    render(<DeckCard card={makeDeckCard(1)} isTop stackIndex={0} onSwipe={vi.fn()} />);
+
+    expect(screen.getByRole('heading', { name: 'Name 1 Mata' })).toBeInTheDocument();
+  });
 });

@@ -7,6 +7,7 @@ import { Star, Heart, MessageSquare, ChevronRight, HeartHandshake } from 'lucide
 import { useMatches } from '@/hooks/useMatches';
 
 import { MatchDetailSheet } from '@/components/MatchDetailSheet';
+import { formatBabyName } from '@/lib/babyNameDisplay';
 import { nameGenderStyles } from '@/lib/nameGenderStyles';
 
 interface MatchesListProps {
@@ -24,9 +25,9 @@ export const MatchesList: React.FC<MatchesListProps> = ({ onGoToDeck }) => {
   );
 
   return (
-    <div id="screen-our-list" className="flex-1 flex flex-col w-full max-w-lg mx-auto pb-20 px-4 pt-3">
+    <div id="screen-our-list" className="flex-1 min-h-0 overflow-hidden flex flex-col w-full max-w-lg mx-auto pb-20 px-4 pt-3">
       {/* Header */}
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 shrink-0">
         <div>
           <h1 className="text-2xl sm:text-3xl font-serif-name font-bold text-[#2b1b24] dark:text-[#f5edf2]">
             Our Matches
@@ -53,7 +54,7 @@ export const MatchesList: React.FC<MatchesListProps> = ({ onGoToDeck }) => {
       </div>
 
       {/* Segmented Control: All / Boys / Girls / Unisex */}
-      <div className="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-[#f4e8e1]/70 dark:bg-[#251b22] border border-[#ecd9d0] dark:border-[#3a2d36] mb-4">
+      <div className="grid grid-cols-4 gap-1 p-1 rounded-2xl bg-[#f4e8e1]/70 dark:bg-[#251b22] border border-[#ecd9d0] dark:border-[#3a2d36] mb-4 shrink-0">
         {(
           [
             { id: 'all', label: 'All' },
@@ -134,7 +135,10 @@ export const MatchesList: React.FC<MatchesListProps> = ({ onGoToDeck }) => {
 
       {/* MatchWithName Rows */}
       {!loading && matches.length > 0 && (
-        <div className="space-y-2.5 overflow-y-auto">
+        <div
+          data-testid="matches-scroll-region"
+          className="flex-1 min-h-0 space-y-2.5 overflow-y-auto overscroll-contain pb-4"
+        >
           {matches.map((match) => {
             const dateStr = new Date(match.created_at).toLocaleDateString(undefined, {
               month: 'short',
@@ -152,10 +156,10 @@ export const MatchesList: React.FC<MatchesListProps> = ({ onGoToDeck }) => {
               >
                 {/* Name & details */}
                 <div className="flex-1 pr-3 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className={`w-2 h-2 rounded-full ${genderStyle.dot} shrink-0`} />
-                    <h3 className="text-xl font-serif-name font-bold text-[#2b1b24] dark:text-[#f5edf2] truncate">
-                      {match.name.value}
+                  <div className="flex items-start gap-2">
+                    <span className={`w-2 h-2 rounded-full ${genderStyle.dot} shrink-0 mt-2`} />
+                    <h3 className="min-w-0 flex-1 text-xl leading-tight font-serif-name font-bold text-[#2b1b24] dark:text-[#f5edf2] break-words">
+                      {formatBabyName(match.name.value)}
                     </h3>
 
                     {match.is_love && (

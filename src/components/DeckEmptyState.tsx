@@ -1,21 +1,21 @@
 "use client";
 
 import React from 'react';
-import { Plus, SlidersHorizontal, HeartHandshake } from 'lucide-react';
+import { Plus, RefreshCw, HeartHandshake } from 'lucide-react';
 import { CoupleStats } from '@/lib/supabase/database.types';
 
 interface DeckEmptyStateProps {
   stats: CoupleStats | null;
   mySwipesCount: number;
   onOpenAddName: () => void;
-  onOpenFilters: () => void;
+  onShowAllNames: () => void;
 }
 
 export const DeckEmptyState: React.FC<DeckEmptyStateProps> = ({
   stats,
   mySwipesCount,
   onOpenAddName,
-  onOpenFilters,
+  onShowAllNames,
 }) => {
   return (
     <div
@@ -65,12 +65,12 @@ export const DeckEmptyState: React.FC<DeckEmptyStateProps> = ({
 
         <button
           type="button"
-          id="btn-empty-widen-filters"
-          onClick={onOpenFilters}
+          id="btn-empty-show-all-names"
+          onClick={onShowAllNames}
           className="flex items-center justify-center gap-2 w-full py-3.5 px-4 rounded-xl font-semibold bg-white dark:bg-[#251d23] border border-[#ebdcd4] dark:border-[#382b35] text-[#2b1b24] dark:text-[#f5edf2] hover:bg-[#faede8] dark:hover:bg-[#2c222a] shadow-xs transition-all"
         >
-          <SlidersHorizontal className="w-4 h-4 text-[#c05835] dark:text-[#ea7a56]" />
-          Widen Language or Gender Filter
+          <RefreshCw className="w-4 h-4 text-[#c05835] dark:text-[#ea7a56]" />
+          Show All Names
         </button>
       </div>
     </div>

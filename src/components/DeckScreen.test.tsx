@@ -77,6 +77,35 @@ describe('DeckScreen', () => {
     expect(fetchMock).toHaveBeenCalledWith('/api/deck?gender=all&limit=25&languages=es');
   });
 
+  it('clears an exhausted filter and fetches the full catalogue', async () => {
+    const user = userEvent.setup();
+    localStorage.setItem('baby_names_deck_filters', JSON.stringify({
+      gender: 'all', languages: ['en', 'es', 'nl'], version: 2,
+    }));
+    let deckRequests = 0;
+    const fetchMock = vi.fn((input: RequestInfo | URL) => {
+      if (!String(input).startsWith('/api/deck')) {
+        throw new Error(`Unexpected request: ${String(input)}`);
+      }
+      deckRequests += 1;
+      return Promise.resolve(jsonResponse({
+        cards: deckRequests === 1 ? [] : baseCards,
+        count: deckRequests === 1 ? 0 : baseCards.length,
+      }));
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    renderDeck();
+    expect(await screen.findByText("You've reached the end!")).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Show All Names' }));
+
+    expect(await screen.findByRole('heading', { name: 'Name 1 Mata' })).toBeInTheDocument();
+    expect(fetchMock).toHaveBeenNthCalledWith(1, '/api/deck?gender=all&limit=25&languages=en%2Ces%2Cnl');
+    expect(fetchMock).toHaveBeenNthCalledWith(2, '/api/deck?gender=all&limit=25');
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
   it('renders a card, posts the swipe body, and removes it optimistically', async () => {
     const user = userEvent.setup();
     const post = deferred<Response>();
@@ -90,12 +119,12 @@ describe('DeckScreen', () => {
     vi.stubGlobal('fetch', fetchMock);
 
     renderDeck();
-    expect(await screen.findByText('Name 1')).toBeInTheDocument();
+    expect(await screen.findByText('Name 1 Mata')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Like this name' }));
 
-    expect(screen.queryByText('Name 1')).not.toBeInTheDocument();
-    expect(screen.getByText('Name 2')).toBeInTheDocument();
+    expect(screen.queryByText('Name 1 Mata')).not.toBeInTheDocument();
+    expect(screen.getByText('Name 2 Mata')).toBeInTheDocument();
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/swipes',
       expect.objectContaining({
@@ -105,7 +134,7 @@ describe('DeckScreen', () => {
     );
 
     post.resolve(jsonResponse(makeSwipeResponse(baseCards[0])));
-    await waitFor(() => expect(screen.queryByText('Name 1')).not.toBeInTheDocument());
+    await waitFor(() => expect(screen.queryByText('Name 1 Mata')).not.toBeInTheDocument());
   });
 
   it('restores a failed optimistic swipe and shows the error banner', async () => {
@@ -122,11 +151,11 @@ describe('DeckScreen', () => {
     }));
 
     renderDeck();
-    await screen.findByText('Name 1');
+    await screen.findByText('Name 1 Mata');
     await user.click(screen.getByRole('button', { name: 'Like this name' }));
 
     expect(await screen.findByText('Could not record swipe. Restored the card.')).toBeInTheDocument();
-    expect(screen.getByText('Name 1')).toBeInTheDocument();
+    expect(screen.getByText('Name 1 Mata')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
   });
 
@@ -153,7 +182,7 @@ describe('DeckScreen', () => {
     }));
 
     renderDeck(onMatchCelebration);
-    await screen.findByText('Name 1');
+    await screen.findByText('Name 1 Mata');
     await user.click(screen.getByRole('button', { name: 'Like this name' }));
 
     await waitFor(() => expect(onMatchCelebration).toHaveBeenCalledTimes(expected));
@@ -184,10 +213,10 @@ describe('DeckScreen', () => {
     }));
 
     renderDeck();
-    await screen.findByText('Name 1');
+    await screen.findByText('Name 1 Mata');
     await user.click(screen.getByRole('button', { name: 'Like this name' }));
     await user.click(screen.getByRole('button', { name: 'Undo last swipe' }));
-    expect(await screen.findByText('Name 1')).toBeInTheDocument();
+    expect(await screen.findByText('Name 1 Mata')).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Undo last swipe' }));
     expect(await screen.findByText('No recent swipe to undo')).toBeInTheDocument();

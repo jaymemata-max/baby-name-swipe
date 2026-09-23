@@ -4,6 +4,7 @@ import type { MatchWithName } from '@/lib/types';
 
 import React, { useEffect, useState } from 'react';
 import { X, Heart, Star, Trash2, Check, AlertTriangle, MessageSquare } from 'lucide-react';
+import { formatBabyName } from '@/lib/babyNameDisplay';
 import { nameGenderStyles } from '@/lib/nameGenderStyles';
 
 interface MatchDetailSheetProps {
@@ -117,7 +118,7 @@ export const MatchDetailSheet: React.FC<MatchDetailSheetProps> = ({
         {/* Hero Title */}
         <div className="mt-5 text-center">
           <h2 className={`text-4xl font-serif-name font-bold ${genderStyle.name}`}>
-            {match.name.value}
+            {formatBabyName(match.name.value)}
           </h2>
           {match.name.meaning && <p className="mt-2 text-base text-[#5c4755] dark:text-[#cfbecc] italic max-w-sm mx-auto">
             &ldquo;{match.name.meaning}&rdquo;
@@ -191,7 +192,7 @@ export const MatchDetailSheet: React.FC<MatchDetailSheetProps> = ({
               <div className="flex items-start gap-2.5 mb-3">
                 <AlertTriangle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
                 <p className="text-xs text-rose-800 dark:text-rose-200 leading-relaxed">
-                  Are you sure? This will remove <strong>{match.name.value}</strong> from both of your lists and won&apos;t be dealt again.
+                  Are you sure? This will remove <strong>{formatBabyName(match.name.value)}</strong> from both of your lists and won&apos;t be dealt again.
                 </p>
               </div>
               <div className="flex gap-2">

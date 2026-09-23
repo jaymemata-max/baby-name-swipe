@@ -27,7 +27,7 @@ export async function GET(request: Request) {
     if (!parsed.success) {
       throw new ApiError(
         422,
-        "gender must be all|boy|girl|unisex, limit 1-100, languages a comma-separated subset of en,es,nl,fr",
+        "gender must be all|boy|girl|unisex, limit 1-100, languages a comma-separated subset of en,es,nl,fr,pt",
       );
     }
 

@@ -3,8 +3,9 @@
 import React, { useCallback, useEffect } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
-import { DeckCard as DeckCardType, SwipeDirection } from '@/lib/supabase/database.types';
+import type { DeckCard as DeckCardType, NameLanguage, SwipeDirection } from '@/lib/supabase/database.types';
 import { Sparkles, Heart, Check, X } from 'lucide-react';
+import { formatBabyName } from '@/lib/babyNameDisplay';
 import { nameGenderStyles } from '@/lib/nameGenderStyles';
 
 interface DeckCardProps {
@@ -16,6 +17,14 @@ interface DeckCardProps {
 
 const SWIPE_THRESHOLD_X = 90;
 const SWIPE_THRESHOLD_Y = 85;
+
+const LANGUAGE_FLAGS: Record<NameLanguage, { label: string; flag: string }> = {
+  nl: { label: 'NL', flag: '🇳🇱' },
+  en: { label: 'EN', flag: '🇬🇧' },
+  es: { label: 'ES', flag: '🇪🇸' },
+  fr: { label: 'FR', flag: '🇫🇷' },
+  pt: { label: 'PT', flag: '🇧🇷' },
+};
 
 export const DeckCard: React.FC<DeckCardProps> = ({ card, isTop, stackIndex, onSwipe }) => {
   // Spring animation state for the card
@@ -134,13 +143,6 @@ export const DeckCard: React.FC<DeckCardProps> = ({ card, isTop, stackIndex, onS
 
   const genderStyle = nameGenderStyles[card.gender];
 
-  const languageFlags: Record<string, { label: string; flag: string }> = {
-    nl: { label: 'NL', flag: '🇳🇱' },
-    en: { label: 'EN', flag: '🇬🇧' },
-    es: { label: 'ES', flag: '🇪🇸' },
-    fr: { label: 'FR', flag: '🇫🇷' },
-  };
-
   return (
     <animated.div
       {...(isTop ? bind() : {})}
@@ -213,8 +215,8 @@ export const DeckCard: React.FC<DeckCardProps> = ({ card, isTop, stackIndex, onS
 
       {/* Hero Name & Meaning Center */}
       <div className="my-auto text-center px-2 py-4">
-        <h2 className={`text-5xl sm:text-6xl font-serif-name font-bold leading-tight break-words ${genderStyle.name}`}>
-          {card.value}
+        <h2 className={`text-4xl sm:text-5xl font-serif-name font-bold leading-tight break-words ${genderStyle.name}`}>
+          {formatBabyName(card.value)}
         </h2>
 
         {card.meaning && <div className="mt-4 max-w-[280px] mx-auto">
@@ -232,7 +234,7 @@ export const DeckCard: React.FC<DeckCardProps> = ({ card, isTop, stackIndex, onS
           </span>
           <div className="flex items-center gap-1.5">
             {card.works_in && card.works_in.map((lang) => {
-              const info = languageFlags[lang] || { label: lang.toUpperCase(), flag: '' };
+              const info = LANGUAGE_FLAGS[lang] ?? { label: lang.toUpperCase(), flag: '' };
               return (
                 <span
                   key={lang}

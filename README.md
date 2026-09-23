@@ -12,7 +12,7 @@ answers until then - so nobody is nudged into agreeing.
 
 - [x] Schema, row level security, match logic
 - [x] REST API for onboarding, deck, swipes, matches, custom names
-- [x] 408-name catalogue, tagged by which languages it is pronounceable in
+- [x] 422-name catalogue, tagged by which languages it is pronounceable in
 - [x] Schema tests covering matching, security and the couple rules
 - [x] Swipe deck, match celebration, shortlist, settings, onboarding
 - [x] Realtime "it's a match" toast over Supabase Realtime
@@ -47,7 +47,8 @@ Matching is a database trigger, not application code. If you both swipe the
 same name in the same second, you still get exactly one match.
 
 Every catalogue name is tagged with the languages a native speaker can say it
-in (`en`, `es`, `nl`, `fr`). `Gijs` is Dutch-only; `Mateo` works in all four.
+in (`en`, `es`, `nl`, `fr`, `pt`). `Gijs` is Dutch-only; `Ravi` is tagged for
+Brazilian Portuguese, and `Mateo` works across the original four languages.
 The deck can filter on that, so a mixed-language family never has to argue
 about a name half of them cannot pronounce.
 

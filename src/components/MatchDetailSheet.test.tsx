@@ -38,6 +38,6 @@ describe('MatchDetailSheet', () => {
 
     await user.click(screen.getByRole('button', { name: 'Open second' }));
     expect(screen.getByLabelText('Shared Note')).toHaveValue('Second note');
-    expect(screen.getByRole('heading', { name: 'Name 2' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Name 2 Mata' })).toBeInTheDocument();
   });
 });
