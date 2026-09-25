@@ -13,6 +13,17 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onSignedIn }) => {
   const [submittedEmail, setSubmittedEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // Supabase's shared email service is rate limited per project, so every
+  // extra tap costs one of a very small hourly budget. Block the button for
+  // a minute after each attempt rather than letting someone burn the quota
+  // in ten seconds and lock both of them out for an hour.
+  const [cooldown, setCooldown] = useState(0);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   useEffect(() => {
     // Check URL query parameters for auth error handling
@@ -29,6 +40,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onSignedIn }) => {
 
   const handleSendMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (cooldown > 0 || loading) return;
     if (!email.trim() || !email.includes('@')) {
       setErrorMessage('Please enter a valid email address.');
       return;
@@ -56,13 +68,20 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onSignedIn }) => {
       // Never fall through to the "check your email" screen on a failure:
       // a link that was never sent must not look like one that was.
       const raw = err instanceof Error ? err.message : '';
-      setErrorMessage(
-        /failed to fetch|networkerror|load failed/i.test(raw)
-          ? 'Could not reach the server. Check your connection and try again.'
-          : raw || 'Could not send the link. Check the address and try again.',
-      );
+      if (/rate limit|too many requests|over_email_send_rate/i.test(raw)) {
+        // Supabase's built-in mail service, not our server. Waiting is the
+        // only fix from in here; custom SMTP is the fix in the dashboard.
+        setErrorMessage(
+          'Too many sign-in emails were sent from this app recently. The limit is on the mail service, not your address. Wait about an hour and try again.',
+        );
+      } else if (/failed to fetch|networkerror|load failed/i.test(raw)) {
+        setErrorMessage('Could not reach the server. Check your connection and try again.');
+      } else {
+        setErrorMessage(raw || 'Could not send the link. Check the address and try again.');
+      }
     } finally {
       setLoading(false);
+      setCooldown(60);
     }
   };
 
@@ -117,10 +136,16 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onSignedIn }) => {
           <button
             type="submit"
             id="btn-send-magic-link"
-            disabled={loading || !email.trim()}
+            disabled={loading || cooldown > 0 || !email.trim()}
             className="w-full py-3.5 px-4 rounded-xl font-bold bg-[#e25567] hover:bg-[#d24255] text-white shadow-md flex items-center justify-center gap-2 transition-all active:scale-[0.99] disabled:opacity-50"
           >
-            <span>{loading ? 'Sending link...' : 'Send Magic Link'}</span>
+            <span>
+              {loading
+                ? 'Sending link...'
+                : cooldown > 0
+                  ? `Wait ${cooldown}s before trying again`
+                  : 'Send Magic Link'}
+            </span>
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>

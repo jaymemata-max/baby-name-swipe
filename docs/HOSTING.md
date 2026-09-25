@@ -176,11 +176,30 @@ the tab badge, but nothing when the app is closed.
 
 ## Things that will go wrong
 
-**The magic link does not arrive.** Supabase's built-in email service is rate
-limited to a handful of messages per hour and is explicitly not meant for
-production. For two people signing in a few times that is fine. Check spam
-first. If you hit the limit, wait an hour or connect your own SMTP under
-Authentication → Emails.
+**"email rate limit exceeded" on the sign-in screen.** This one is near
+certain to happen, and it happened on the first attempt here. Supabase's
+built-in email service is shared across all free projects, rate limited to a
+handful of messages per hour, and explicitly not meant for production. The
+limit is **per project, not per address**, so both of you share one small
+budget, and every tap of Send Magic Link spends one - including the ones that
+fail.
+
+Three ways out, cheapest first:
+
+1. **Wait an hour.** The budget refills. The app now blocks the button for 60
+   seconds after each attempt so you cannot burn the next hour's budget in ten
+   seconds.
+2. **Raise the limit.** Authentication → Rate Limits in the dashboard shows
+   the current email rate and lets you raise it within the free-tier ceiling.
+   Check what it is actually set to before assuming.
+3. **Connect your own SMTP.** Authentication → Emails → SMTP Settings. Brevo
+   and Resend both have free tiers that cover two people many times over. This
+   is the real fix and it removes the limit entirely.
+
+If this keeps getting in the way, the deeper answer is that magic links are a
+poor fit here: two known people, one private app, and every single sign-in
+needs a mail round trip through a shared service. Email plus password needs
+one setup and then never touches email again. See `docs/DECISIONS.md`.
 
 **The link opens on an error page.** The redirect URL in step 3 does not match
 the deployed URL exactly. Vercel preview deployments get their own URLs, so

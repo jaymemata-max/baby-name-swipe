@@ -122,6 +122,29 @@ Two genuine bugs in the React itself, both now fixed:
 What was kept: all 15 components, the four hooks, the design tokens, the
 gesture handling and the card animation. That part was worth the exercise.
 
+## Magic links may be the wrong choice
+
+Sign-in uses Supabase magic links. On the first real attempt this produced
+`email rate limit exceeded` before either person got in once.
+
+The cause is not the code: Supabase's built-in mail service is shared across
+free projects and rate limited per project, so two people share one small
+hourly budget and every failed tap spends from it. Mitigated in
+`SignInScreen.tsx` with a 60 second cooldown, so the button cannot drain the
+budget faster than it refills.
+
+But the mitigation does not fix the shape of the problem. For **two known
+people on a private app**, every sign-in requiring a mail round trip through a
+rate-limited shared service is a dependency with no upside. Email plus
+password costs one setup each and then never touches email again.
+
+Arguments for keeping magic links: nothing to remember, no password to store,
+and sessions persist so sign-in is rare in practice. Arguments against: the
+one time you need it is the one time the limit bites, and that is usually on a
+phone somewhere inconvenient.
+
+Not changed yet. Custom SMTP also solves it and keeps the nicer flow.
+
 ## Open questions
 
 - **Should `partner_liked` be shown in the UI?** The API returns it. Showing it
