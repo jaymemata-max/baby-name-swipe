@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Mail, ArrowRight, CheckCircle2, AlertCircle, Heart } from 'lucide-react';
-import { createSupabaseBrowserClient } from '@/lib/supabase/client';
+import { createSupabaseMagicLinkClient } from '@/lib/supabase/client';
 
 interface SignInScreenProps {
   onSignedIn: () => void;
@@ -50,7 +50,7 @@ export const SignInScreen: React.FC<SignInScreenProps> = ({ onSignedIn }) => {
     setErrorMessage(null);
 
     try {
-      const supabase = createSupabaseBrowserClient();
+      const supabase = createSupabaseMagicLinkClient();
       const origin = typeof window !== 'undefined' ? window.location.origin : '';
       const { error } = await supabase.auth.signInWithOtp({
         email: email.trim(),

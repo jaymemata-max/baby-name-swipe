@@ -145,6 +145,22 @@ phone somewhere inconvenient.
 
 Not changed yet. Custom SMTP also solves it and keeps the nicer flow.
 
+### Mobile magic links use the implicit browser flow
+
+`@supabase/ssr` starts magic links with PKCE by default. That failed on iOS
+when the link was requested from the installed home-screen app but Mail opened
+it in Safari: Safari did not have the PKCE verifier created by the installed
+app. Supabase confirmed the email address, then the callback could not create
+a session.
+
+The hosted free tier does not allow this project's email template to use the
+recommended `TokenHash` server callback without first adding custom SMTP. The
+sign-in screen therefore uses a one-purpose implicit client to request the
+link. `/auth/callback` receives the tokens in the URL fragment, removes the
+fragment before creating any Supabase client, and imports the session into the
+normal cookie-backed client. Existing PKCE links remain supported. The rest of
+the app still uses the SSR client and Postgres RLS exactly as before.
+
 ## Open questions
 
 - **Should `partner_liked` be shown in the UI?** The API returns it. Showing it
