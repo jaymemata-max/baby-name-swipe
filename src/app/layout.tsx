@@ -1,19 +1,19 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Plus_Jakarta_Sans } from "next/font/google";
+import localFont from "next/font/local";
 
 import "./globals.css";
 
-// Self-hosted by Next.js: no external request, no layout shift.
-const displayFont = Fraunces({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
+// Bundled with the app so production and CI builds never depend on Google Fonts.
+const displayFont = localFont({
+  src: "./fonts/fraunces-latin.woff2",
+  weight: "400 700",
   variable: "--font-display",
   display: "swap",
 });
 
-const bodyFont = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+const bodyFont = localFont({
+  src: "./fonts/plus-jakarta-sans-latin.woff2",
+  weight: "400 700",
   variable: "--font-body",
   display: "swap",
 });
