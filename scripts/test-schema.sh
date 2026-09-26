@@ -36,7 +36,8 @@ for test_file in "$ROOT"/supabase/tests/0[1-9]_*.sql; do
   for setup in "$ROOT/supabase/tests/00_supabase_stub.sql" "$ROOT"/supabase/migrations/*.sql; do
     if [[ "$name" == "06_catalogue_growth.sql" && (
       "$setup" == */20260921202500_expand_name_catalogue.sql ||
-      "$setup" == */20260923095707_add_brazilian_names.sql
+      "$setup" == */20260923095707_add_brazilian_names.sql ||
+      "$setup" == */20260926182304_expand_multilingual_catalogue.sql
     ) ]]; then
       continue
     fi
