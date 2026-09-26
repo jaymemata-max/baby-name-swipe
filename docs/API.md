@@ -26,7 +26,7 @@ Everything the app needs on boot.
   "profile": { "id": "...", "display_name": "Merel", "avatar_emoji": "🤰", "couple_id": "..." },
   "couple": { "id": "...", "title": "Baby Mata", "invite_code": "Q95N8X", "due_date": "2027-02-14" },
   "partner": { "id": "...", "display_name": "Jayme", "avatar_emoji": "👨" },
-  "stats": { "total_names": 422, "my_swipes": 84, "partner_swipes": 51, "my_likes": 22, "matches": 7, "shortlisted": 2 }
+  "stats": { "total_names": 622, "my_swipes": 84, "partner_swipes": 51, "my_likes": 22, "matches": 7, "shortlisted": 2 }
 }
 ```
 
@@ -98,8 +98,8 @@ only dealt if a native speaker of **every** listed language can pronounce it
 naturally. Leave it off for the whole catalogue. Names you added yourselves
 always come through, filter or not - you chose them on purpose.
 
-With `languages=en,es,nl` the catalogue is 173 names (88 boys, 93 girls,
-including unisex in both). Without a filter it is 422. The app defaults to
+With `languages=en,es,nl` the catalogue is 207 names (99 boys, 116 girls,
+including unisex in both). Without a filter it is 622. The app defaults to
 the unfiltered catalogue.
 
 ```json

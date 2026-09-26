@@ -114,14 +114,68 @@ begin
 end;
 $$;
 
+\ir ../migrations/20260926182304_expand_multilingual_catalogue.sql
+
+do $$
+begin
+  if (select count(*) from public.names where couple_id is null) <> 622 then
+    raise exception 'Multilingual catalogue count incorrect after migration';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{en,es,nl}') <> 207 then
+    raise exception 'Dutch/English/Spanish coverage count incorrect after migration';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 101 then
+    raise exception 'Portuguese coverage count incorrect after multilingual migration';
+  end if;
+  if exists (
+    select 1 from public.names
+    where couple_id is null and (origin is null or meaning is null)
+  ) then
+    raise exception 'A global catalogue name is missing origin or meaning';
+  end if;
+  if exists (
+    select 1 from public.names where couple_id is null
+    group by lower(value), gender having count(*) > 1
+  ) then
+    raise exception 'Multilingual migration introduced a duplicate global name';
+  end if;
+  if (select count(*) from public.swipes) <> 2 then
+    raise exception 'A swipe was lost while expanding the multilingual catalogue';
+  end if;
+  if (select count(*) from public.matches) <> 1 then
+    raise exception 'A match was lost while expanding the multilingual catalogue';
+  end if;
+  if not exists (
+    select 1 from before_catalogue_update b
+    join public.names n on n.id = b.name_id
+    join public.matches m on m.id = b.match_id and m.name_id = n.id
+  ) then
+    raise exception 'Existing name or match ID changed during multilingual expansion';
+  end if;
+end;
+$$;
+
+\ir ../migrations/20260926182304_expand_multilingual_catalogue.sql
+
+do $$
+begin
+  if (select count(*) from public.names where couple_id is null) <> 622 then
+    raise exception 'Reapplying multilingual migration changed catalogue size';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 101 then
+    raise exception 'Reapplying multilingual migration changed Portuguese coverage';
+  end if;
+end;
+$$;
+
 \ir ../migrations/20260923095707_add_brazilian_names.sql
 
 do $$
 begin
-  if (select count(*) from public.names where couple_id is null) <> 422 then
+  if (select count(*) from public.names where couple_id is null) <> 622 then
     raise exception 'Reapplying Brazilian migration changed catalogue size';
   end if;
-  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 37 then
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 101 then
     raise exception 'Reapplying Brazilian migration duplicated Portuguese tags';
   end if;
 end;

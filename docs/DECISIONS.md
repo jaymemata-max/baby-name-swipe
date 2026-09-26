@@ -170,6 +170,6 @@ the app still uses the SSR client and Postgres RLS exactly as before.
   head-to-head or drag-to-order step is likely needed.
 - **Surname fit.** "Sounds good with our surname" is the real test and nothing
   models it.
-- **Is 173 names enough?** That is what `en,es,nl` leaves. Plenty to find a
+- **Is 207 names enough?** That is what `en,es,nl` leaves. Plenty to find a
   shortlist, but if the deck runs dry the answer is more catalogue, not a
   looser filter.
