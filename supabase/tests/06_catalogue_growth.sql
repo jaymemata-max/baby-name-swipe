@@ -155,15 +155,78 @@ begin
 end;
 $$;
 
+\ir ../migrations/20261119230034_expand_popular_name_catalogue.sql
+
+do $$
+begin
+  if (select count(*) from public.names where couple_id is null) <> 822 then
+    raise exception 'Popular-name catalogue count incorrect after migration';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{en,es,nl}') <> 230 then
+    raise exception 'Dutch/English/Spanish coverage incorrect after popular-name migration';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 139 then
+    raise exception 'Portuguese coverage incorrect after popular-name migration';
+  end if;
+  if exists (
+    select 1 from public.names
+    where couple_id is null and (origin is null or meaning is null)
+  ) then
+    raise exception 'A global catalogue name is missing origin or meaning';
+  end if;
+  if exists (
+    select 1 from public.names where couple_id is null
+    group by lower(value), gender having count(*) > 1
+  ) then
+    raise exception 'Popular-name migration introduced a duplicate global name';
+  end if;
+  if not exists (
+    select 1 from public.names
+    where couple_id is null and value = 'Maria Cecília' and gender = 'girl'
+  ) or not exists (
+    select 1 from public.names
+    where couple_id is null and value = 'Rían' and gender = 'boy'
+  ) then
+    raise exception 'Expected Brazilian and Irish names are missing';
+  end if;
+  if (select count(*) from public.swipes) <> 2 then
+    raise exception 'A swipe was lost while adding popular names';
+  end if;
+  if (select count(*) from public.matches) <> 1 then
+    raise exception 'A match was lost while adding popular names';
+  end if;
+  if not exists (
+    select 1 from before_catalogue_update b
+    join public.names n on n.id = b.name_id
+    join public.matches m on m.id = b.match_id and m.name_id = n.id
+  ) then
+    raise exception 'Existing name or match ID changed during popular-name expansion';
+  end if;
+end;
+$$;
+
+\ir ../migrations/20261119230034_expand_popular_name_catalogue.sql
+
+do $$
+begin
+  if (select count(*) from public.names where couple_id is null) <> 822 then
+    raise exception 'Reapplying popular-name migration changed catalogue size';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 139 then
+    raise exception 'Reapplying popular-name migration changed Portuguese coverage';
+  end if;
+end;
+$$;
+
 \ir ../migrations/20260926182304_expand_multilingual_catalogue.sql
 
 do $$
 begin
-  if (select count(*) from public.names where couple_id is null) <> 622 then
-    raise exception 'Reapplying multilingual migration changed catalogue size';
+  if (select count(*) from public.names where couple_id is null) <> 822 then
+    raise exception 'Reapplying multilingual migration after expansion changed catalogue size';
   end if;
-  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 101 then
-    raise exception 'Reapplying multilingual migration changed Portuguese coverage';
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 139 then
+    raise exception 'Reapplying multilingual migration after expansion changed Portuguese coverage';
   end if;
 end;
 $$;
@@ -172,11 +235,11 @@ $$;
 
 do $$
 begin
-  if (select count(*) from public.names where couple_id is null) <> 622 then
-    raise exception 'Reapplying Brazilian migration changed catalogue size';
+  if (select count(*) from public.names where couple_id is null) <> 822 then
+    raise exception 'Reapplying Brazilian migration after expansion changed catalogue size';
   end if;
-  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 101 then
-    raise exception 'Reapplying Brazilian migration duplicated Portuguese tags';
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 139 then
+    raise exception 'Reapplying Brazilian migration after expansion changed Portuguese coverage';
   end if;
 end;
 $$;

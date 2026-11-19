@@ -108,9 +108,9 @@ ones depend on the earlier ones.
 Check it worked:
 
 ```sql
-select count(*) from names;                      -- 622 after all migrations
-select count(*) from names where works_in @> '{en,es,nl}';  -- 207
-select count(*) from names where works_in @> '{pt}';         -- 101
+select count(*) from names;                      -- 822 after all migrations
+select count(*) from names where works_in @> '{en,es,nl}';  -- 230
+select count(*) from names where works_in @> '{pt}';         -- 139
 ```
 
 ### 3. Configure auth
