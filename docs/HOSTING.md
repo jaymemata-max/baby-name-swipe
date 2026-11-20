@@ -15,7 +15,7 @@ Budget: nothing.
 
 ### Why this is not close
 
-Two people swiping a 400-name catalogue produce roughly:
+Two people swiping an 850-name catalogue produce roughly:
 
 - 2 profile rows
 - 1 couple row
@@ -108,9 +108,9 @@ ones depend on the earlier ones.
 Check it worked:
 
 ```sql
-select count(*) from names;                      -- 822 after all migrations
-select count(*) from names where works_in @> '{en,es,nl}';  -- 230
-select count(*) from names where works_in @> '{pt}';         -- 139
+select count(*) from names;                      -- 847 after all migrations
+select count(*) from names where works_in @> '{en,es,nl}';  -- 236
+select count(*) from names where works_in @> '{pt}';         -- 146
 ```
 
 ### 3. Configure auth
