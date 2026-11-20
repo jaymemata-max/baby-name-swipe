@@ -95,11 +95,11 @@ everywhere. Editing an applied migration in place will not reapply.
 
 ## Name catalogue
 
-822 names, each tagged `works_in text[]` with the languages a native speaker
+847 names, each tagged `works_in text[]` with the languages a native speaker
 can pronounce it in naturally: `en`, `es`, `nl`, `fr`, `pt`. It means sayable, not
 identical - `Julia` is all four, `Gijs` is Dutch only. The couple speaks
 Dutch, English and Spanish. The deck shows all names by default; choosing
-`en,es,nl` narrows it to 230; 139 names are tagged for Portuguese.
+`en,es,nl` narrows it to 236; 146 names are tagged for Portuguese.
 Retagging one name requires a new migration.
 
 ## Known open risk
