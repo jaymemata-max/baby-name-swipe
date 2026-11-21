@@ -316,3 +316,85 @@ begin
   end if;
 end;
 $$;
+
+create temporary table before_updated_sheet_import as
+select id, value, gender
+from public.names
+where couple_id is null;
+
+\ir ../migrations/20261121023839_import_updated_google_sheet_names.sql
+
+do $$
+begin
+  if (select count(*) from public.names where couple_id is null) <> 870 then
+    raise exception 'Updated-sheet catalogue count incorrect after migration';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{en,es,nl}') <> 246 then
+    raise exception 'Dutch/English/Spanish coverage incorrect after updated-sheet migration';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 159 then
+    raise exception 'Portuguese coverage incorrect after updated-sheet migration';
+  end if;
+  if exists (
+    select 1 from public.names
+    where couple_id is null and (origin is null or meaning is null)
+  ) then
+    raise exception 'A global catalogue name is missing origin or meaning';
+  end if;
+  if exists (
+    select 1 from public.names where couple_id is null
+    group by lower(value), gender having count(*) > 1
+  ) then
+    raise exception 'Updated-sheet migration introduced a duplicate global name';
+  end if;
+  if not exists (
+    select 1 from public.names
+    where couple_id is null and value = 'Sterre' and gender = 'girl'
+  ) or not exists (
+    select 1 from public.names
+    where couple_id is null and value = 'Mireia' and gender = 'girl'
+  ) or not exists (
+    select 1 from public.names
+    where couple_id is null and value = 'Blair' and gender = 'unisex'
+  ) or not exists (
+    select 1 from public.names
+    where couple_id is null and value = 'Winter' and gender = 'unisex'
+  ) then
+    raise exception 'Expected updated-sheet names or genders are missing';
+  end if;
+  if exists (
+    select 1 from public.names
+    where couple_id is null and gender = 'girl' and lower(value) in ('sage', 'river', 'parker')
+  ) then
+    raise exception 'Existing names were duplicated as girl cards';
+  end if;
+  if (select count(*) from public.swipes) <> 2 then
+    raise exception 'A swipe was lost while importing the updated sheet';
+  end if;
+  if (select count(*) from public.matches) <> 1 then
+    raise exception 'A match was lost while importing the updated sheet';
+  end if;
+  if exists (
+    select 1
+    from before_updated_sheet_import b
+    left join public.names n
+      on n.id = b.id and n.value = b.value and n.gender = b.gender
+    where n.id is null
+  ) then
+    raise exception 'An existing name ID changed during updated-sheet import';
+  end if;
+end;
+$$;
+
+\ir ../migrations/20261121023839_import_updated_google_sheet_names.sql
+
+do $$
+begin
+  if (select count(*) from public.names where couple_id is null) <> 870 then
+    raise exception 'Reapplying updated-sheet migration changed catalogue size';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 159 then
+    raise exception 'Reapplying updated-sheet migration changed Portuguese coverage';
+  end if;
+end;
+$$;
