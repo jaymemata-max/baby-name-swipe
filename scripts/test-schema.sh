@@ -39,7 +39,8 @@ for test_file in "$ROOT"/supabase/tests/0[1-9]_*.sql; do
       "$setup" == */20260923095707_add_brazilian_names.sql ||
       "$setup" == */20260926182304_expand_multilingual_catalogue.sql ||
       "$setup" == */20261119230034_expand_popular_name_catalogue.sql ||
-      "$setup" == */20261120020617_import_google_sheet_girl_names.sql
+      "$setup" == */20261120020617_import_google_sheet_girl_names.sql ||
+      "$setup" == */20261121023839_import_updated_google_sheet_names.sql
     ) ]]; then
       continue
     fi
