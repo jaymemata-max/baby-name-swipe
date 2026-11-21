@@ -398,3 +398,111 @@ begin
   end if;
 end;
 $$;
+
+create temporary table before_latest_sheet_import as
+select id, value, gender
+from public.names
+where couple_id is null;
+
+\ir ../migrations/20261121135029_import_latest_google_sheet_names.sql
+
+do $$
+begin
+  if (select count(*) from public.names where couple_id is null) <> 1103 then
+    raise exception 'Latest-sheet catalogue count incorrect after migration';
+  end if;
+  if (
+    select count(*)
+    from public.names n
+    left join before_latest_sheet_import b on b.id = n.id
+    where n.couple_id is null and b.id is null
+  ) <> 233 then
+    raise exception 'Latest-sheet migration did not add exactly 233 names';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{en,es,nl}') <> 361 then
+    raise exception 'Dutch/English/Spanish coverage incorrect after latest-sheet migration';
+  end if;
+  if (
+    select count(*) from public.names
+    where couple_id is null
+      and works_in @> '{en,es,nl}'
+      and gender in ('boy', 'unisex')
+  ) <> 114 then
+    raise exception 'Filtered boy/unisex count incorrect after latest-sheet migration';
+  end if;
+  if (
+    select count(*) from public.names
+    where couple_id is null
+      and works_in @> '{en,es,nl}'
+      and gender in ('girl', 'unisex')
+  ) <> 261 then
+    raise exception 'Filtered girl/unisex count incorrect after latest-sheet migration';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 283 then
+    raise exception 'Portuguese coverage incorrect after latest-sheet migration';
+  end if;
+  if exists (
+    select 1 from public.names
+    where couple_id is null
+      and (origin is null or meaning is null or cardinality(works_in) = 0)
+  ) then
+    raise exception 'A global catalogue name is missing origin, meaning or language coverage';
+  end if;
+  if exists (
+    select 1 from public.names where couple_id is null
+    group by lower(value), gender having count(*) > 1
+  ) then
+    raise exception 'Latest-sheet migration introduced a duplicate global name';
+  end if;
+  if not exists (
+    select 1 from public.names
+    where couple_id is null
+      and value = 'Kiara'
+      and gender = 'girl'
+      and origin = 'Italian / Irish'
+      and meaning = 'Bright light, clear horizon'
+  ) or not exists (
+    select 1 from public.names
+    where couple_id is null and value = 'Maria Vitória' and gender = 'girl'
+  ) or not exists (
+    select 1 from public.names
+    where couple_id is null and value = 'Alexis' and gender = 'unisex'
+  ) or not exists (
+    select 1 from public.names
+    where couple_id is null and value = 'Cielo' and gender = 'unisex'
+  ) then
+    raise exception 'Expected latest-sheet names, meanings or genders are missing';
+  end if;
+  if (select count(*) from public.swipes) <> 2 then
+    raise exception 'A swipe was lost while importing the latest sheet';
+  end if;
+  if (select count(*) from public.matches) <> 1 then
+    raise exception 'A match was lost while importing the latest sheet';
+  end if;
+  if exists (
+    select 1
+    from before_latest_sheet_import b
+    left join public.names n
+      on n.id = b.id and n.value = b.value and n.gender = b.gender
+    where n.id is null
+  ) then
+    raise exception 'An existing name ID changed during latest-sheet import';
+  end if;
+end;
+$$;
+
+\ir ../migrations/20261121135029_import_latest_google_sheet_names.sql
+
+do $$
+begin
+  if (select count(*) from public.names where couple_id is null) <> 1103 then
+    raise exception 'Reapplying latest-sheet migration changed catalogue size';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{en,es,nl}') <> 361 then
+    raise exception 'Reapplying latest-sheet migration changed filtered coverage';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 283 then
+    raise exception 'Reapplying latest-sheet migration changed Portuguese coverage';
+  end if;
+end;
+$$;
