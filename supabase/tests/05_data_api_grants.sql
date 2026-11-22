@@ -48,8 +48,8 @@ declare
   catalogue_count integer;
 begin
   select public.catalogue_size() into catalogue_count;
-  if catalogue_count <> 1103 then
-    raise exception 'health check returned %, expected 1103', catalogue_count;
+  if catalogue_count <> 1125 then
+    raise exception 'health check returned %, expected 1125', catalogue_count;
   end if;
 end
 $$;

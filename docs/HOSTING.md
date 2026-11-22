@@ -15,11 +15,11 @@ Budget: nothing.
 
 ### Why this is not close
 
-Two people swiping a 1,103-name catalogue produce roughly:
+Two people swiping a 1,125-name catalogue produce roughly:
 
 - 2 profile rows
 - 1 couple row
-- ~2,200 swipe rows if both people finish the entire catalogue
+- ~2,250 swipe rows if both people finish the entire catalogue
 - ~100 match rows
 
 That is a few hundred kilobytes including indexes, against a 500 MB limit.
@@ -108,9 +108,9 @@ ones depend on the earlier ones.
 Check it worked:
 
 ```sql
-select count(*) from names;                      -- 1103 after all migrations
-select count(*) from names where works_in @> '{en,es,nl}';  -- 361
-select count(*) from names where works_in @> '{pt}';         -- 283
+select count(*) from names;                      -- 1125 after all migrations
+select count(*) from names where works_in @> '{en,es,nl}';  -- 371
+select count(*) from names where works_in @> '{pt}';         -- 293
 ```
 
 ### 3. Configure auth
