@@ -12,7 +12,7 @@ answers until then - so nobody is nudged into agreeing.
 
 - [x] Schema, row level security, match logic
 - [x] REST API for onboarding, deck, swipes, matches, custom names
-- [x] 1,103-name catalogue, tagged by which languages it is pronounceable in
+- [x] 1,125-name catalogue, tagged by which languages it is pronounceable in
 - [x] Schema tests covering matching, security and the couple rules
 - [x] Swipe deck, match celebration, shortlist, settings, onboarding
 - [x] Realtime "it's a match" toast over Supabase Realtime

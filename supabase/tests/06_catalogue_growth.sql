@@ -506,3 +506,111 @@ begin
   end if;
 end;
 $$;
+
+create temporary table before_new_sheet_import as
+select id, value, gender
+from public.names
+where couple_id is null;
+
+\ir ../migrations/20261122232340_import_new_google_sheet_names.sql
+
+do $$
+begin
+  if (select count(*) from public.names where couple_id is null) <> 1125 then
+    raise exception 'New-sheet catalogue count incorrect after migration';
+  end if;
+  if (
+    select count(*)
+    from public.names n
+    left join before_new_sheet_import b on b.id = n.id
+    where n.couple_id is null and b.id is null
+  ) <> 22 then
+    raise exception 'New-sheet migration did not add exactly 22 names';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{en,es,nl}') <> 371 then
+    raise exception 'Dutch/English/Spanish coverage incorrect after new-sheet migration';
+  end if;
+  if (
+    select count(*) from public.names
+    where couple_id is null
+      and works_in @> '{en,es,nl}'
+      and gender in ('boy', 'unisex')
+  ) <> 115 then
+    raise exception 'Filtered boy/unisex count incorrect after new-sheet migration';
+  end if;
+  if (
+    select count(*) from public.names
+    where couple_id is null
+      and works_in @> '{en,es,nl}'
+      and gender in ('girl', 'unisex')
+  ) <> 271 then
+    raise exception 'Filtered girl/unisex count incorrect after new-sheet migration';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 293 then
+    raise exception 'Portuguese coverage incorrect after new-sheet migration';
+  end if;
+  if exists (
+    select 1 from public.names
+    where couple_id is null
+      and (origin is null or meaning is null or cardinality(works_in) = 0)
+  ) then
+    raise exception 'A global catalogue name is missing origin, meaning or language coverage';
+  end if;
+  if exists (
+    select 1 from public.names where couple_id is null
+    group by lower(value), gender having count(*) > 1
+  ) then
+    raise exception 'New-sheet migration introduced a duplicate global name';
+  end if;
+  if not exists (
+    select 1 from public.names
+    where couple_id is null
+      and value = 'Alora'
+      and gender = 'girl'
+      and origin = 'Latin / African'
+      and meaning = 'The Lord is my light, radiant dream'
+  ) or not exists (
+    select 1 from public.names
+    where couple_id is null and value = 'Navy' and gender = 'unisex'
+  ) or not exists (
+    select 1 from public.names
+    where couple_id is null and value = 'Nur' and gender = 'unisex'
+  ) or not exists (
+    select 1 from public.names
+    where couple_id is null and value = 'Zainab' and gender = 'girl'
+  ) then
+    raise exception 'Expected new-sheet names, meanings or genders are missing';
+  end if;
+  if (select count(*) from public.swipes) <> 2 then
+    raise exception 'A swipe was lost while importing the new sheet rows';
+  end if;
+  if (select count(*) from public.matches) <> 1 then
+    raise exception 'A match was lost while importing the new sheet rows';
+  end if;
+  if exists (
+    select 1
+    from before_new_sheet_import b
+    left join public.names n
+      on n.id = b.id and n.value = b.value and n.gender = b.gender
+    where n.id is null
+  ) then
+    raise exception 'An existing name ID changed during new-sheet import';
+  end if;
+end;
+$$;
+
+\ir ../migrations/20261122232340_import_new_google_sheet_names.sql
+
+do $$
+begin
+  if (select count(*) from public.names where couple_id is null) <> 1125 then
+    raise exception 'Reapplying new-sheet migration changed catalogue size';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{en,es,nl}') <> 371 then
+    raise exception 'Reapplying new-sheet migration changed filtered coverage';
+  end if;
+  if (select count(*) from public.names where couple_id is null and works_in @> '{pt}') <> 293 then
+    raise exception 'Reapplying new-sheet migration changed Portuguese coverage';
+  end if;
+end;
+$$;
